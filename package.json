@@ -1,7 +1,7 @@
 {
-  "name": "sdh-bot-slack",
-  "version": "0.0.1",
-  "description": "slack bot test",
+  "name": "sdh-slackbot",
+  "version": "0.0.1b",
+  "description": "Smart Developer Hub SlackBot",
   "license": "Apache-2.0",
   "author": {
     "name": "Carlos Blanco Vallejo",
@@ -9,13 +9,14 @@
     "url": "https://github.com/cblanco"
   },
   "keywords": [
-    "api",
+    "bot",
     "upm",
     "com",
     "sdh",
     "smart",
     "developer",
-    "hub"
+    "hub",
+    "slack"
   ],
   "main": "index.js",
   "dependencies": {
