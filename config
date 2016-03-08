@@ -23,7 +23,7 @@
 
 'use strict';
 
-// SDH API GENERAL CONFIG
+// SDH BOT GENERAL CONFIG
 GLOBAL.BOT_URL = null;  // null is localhost
 GLOBAL.BOT_PORT = 8081;
 
@@ -43,9 +43,12 @@ GLOBAL.SLACK_BOT_TOKEN = "...";
 GLOBAL.CONSOLE_LOG_LEVEL = 'debug';
 GLOBAL.FILE_LOG_PATH = './logs/sdh_log';
 GLOBAL.FILE_LOG_LEVEL = 'debug';
-GLOBAL.FILE_LOG_PERIOD = 24,               // The period at which to rotate in HOURS
-GLOBAL.FILE_LOG_NFILES = 4                 // The number of rotated files to keep.
+GLOBAL.FILE_LOG_PERIOD = 24;               // The period at which to rotate in HOURS
+GLOBAL.FILE_LOG_NFILES = 4;                // The number of rotated files to keep.
 
-// SDH API
-GLOBAL.SDH_API_URL = "http://localhost";
-GLOBAL.SDH_API_PORT = 8080;
+// DEFAULT SDH API
+GLOBAL.SDH_API_URL = "https://sdh.conwet.fi.upm.es/sdhapi";
+
+// DEFAULT SDH Dashboards
+GLOBAL.SDH_DASHBOARD_URL = "https://sdh.conwet.fi.upm.es/";
+//GLOBAL.SDH_DASHBOARD_URL = "http://localhost/";

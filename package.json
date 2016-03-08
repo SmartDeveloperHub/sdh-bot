@@ -1,6 +1,6 @@
 {
-  "name": "sdh-slackbot",
-  "version": "0.0.1c",
+  "name": "sdh-core-bot",
+  "version": "0.0.1a",
   "description": "Smart Developer Hub SlackBot",
   "license": "Apache-2.0",
   "author": {
@@ -18,13 +18,17 @@
     "hub",
     "slack"
   ],
-  "main": "index.js",
+  "main": "sdhbot.js",
   "dependencies": {
-    "botkit": "*",
     "mkdirp": "*",
     "moment": "^2.10.3",
-    "slack-node": "*",
     "bunyan": "*",
-    "bunyan-prettystream": "*"
+    "bunyan-prettystream": "*",
+    "request": "*",
+    "moment": "*",
+    "google-images": "*",
+    "valid-url": "*",
+    "botkit": "*",
+    "node-telegram-bot-api": "*"
   }
 }
