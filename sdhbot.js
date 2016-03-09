@@ -19,12 +19,13 @@
      limitations under the License.
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
 */
+'use strict';
 
     var loadStartDate = new Date();
     try {
         // global buyan
-        const bunyan = require('bunyan');
-        const PrettyStream = require('bunyan-prettystream');
+        var bunyan = require('bunyan');
+        var PrettyStream = require('bunyan-prettystream');
     } catch (err) {
         console.error("Bot Error. bunyan logs problem: " + err);
     }
@@ -42,6 +43,7 @@
     prettyStdOut.pipe(process.stdout);
     GLOBAL.log = null;
     GLOBAL.mkdirp = require("mkdirp");
+    var ready = false;
     var getDirName = require("path").dirname;
     mkdirp(getDirName(FILE_LOG_PATH), function (err) {
         if (err) {
@@ -63,6 +65,7 @@
                         count: FILE_LOG_NFILES
                     }]
             });
+            ready = true;
         }
     });
 
@@ -79,7 +82,7 @@
     process.on('SIGINT', gracefullyShuttinDown);
     process.on('SIGTERM', gracefullyShuttinDown);
 
-    var startBOT = function startBOT () {
+    var funGo = function funGo(callback) {
         log.info("... Loading SDH BOT CORE ...");
         try {
             GLOBAL.moment = require("moment");
@@ -92,14 +95,25 @@
             }, 500);
         }
         log.info('...starting...');
-        var oldBots = require('./brain/botinterfaces.js');
+        //var oldBots = require('./brain/botinterfaces.js');
         log.info('...OK...');
-};
+        callback();
+    };
 
-    var tools = require('./brain/sdhBasic.js');
+    var startBOT = function startBOT (callback) {
+        if (!ready) {
+            setTimeout(function () {
+                funGo(callback);
+            }, 500);
+        } else {
+            funGo(callback);
+        }
+    };
+
+    GLOBAL.internalSDHtools = require('./brain/sdhBasic.js');
     // Export SDH Functions
-    for (var meth in tools) {
-        exports[meth] = tools[meth];
+    for (var meth in internalSDHtools) {
+        exports[meth] = internalSDHtools[meth];
     }
 
     // Export init
