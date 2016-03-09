@@ -111,6 +111,8 @@
     };
 
     GLOBAL.internalSDHtools = require('./brain/sdhBasic.js');
+    GLOBAL.sdhPatternHandlers = require('./brain/sdhPatternHandlers.js');
+    exports.knownPatterns = sdhPatternHandlers.phInfo;
     // Export SDH Functions
     for (var meth in internalSDHtools) {
         exports[meth] = internalSDHtools[meth];
