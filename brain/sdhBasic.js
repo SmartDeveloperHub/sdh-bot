@@ -173,9 +173,9 @@
         log.debug(uri);
         request(uri, function(err, resp, body) {
             var parsedBody = JSON.parse(body);
-            if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHMembers Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+            if (err) {
+                log.error(err);
+                callback(err);
             } else {
                 callback(parsedBody);
             }
@@ -187,9 +187,9 @@
         log.debug(uri);
         request(uri, function(err, resp, body) {
             var parsedBody = JSON.parse(body);
-            if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHMetrics Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+            if (err) {
+                log.error(err);
+                callback(err);
             } else {
                 callback(parsedBody);
             }
@@ -217,8 +217,8 @@
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHProducts Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
@@ -231,8 +231,8 @@
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHProduct Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
@@ -245,8 +245,8 @@
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHProjects Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
@@ -259,8 +259,8 @@
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHProject Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
@@ -301,8 +301,8 @@
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHOrganizations Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
