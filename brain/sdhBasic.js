@@ -203,8 +203,38 @@
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHMetric Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
+            } else {
+                var parsedBody = JSON.parse(body);
+                callback(parsedBody);
+            }
+        });
+    };
+
+    module.exports.getSDHViews = function getSDHViews(callback) {
+        var uri = getValidAPIUri('tbdata/');
+        log.debug(uri);
+        request(uri, function(err, resp, body) {
+            if (err || resp.statusCode !== 200) {
+                log.error(err);
+                callback(err);
+            } else {
+                var parsedBody = JSON.parse(body);
+                callback(parsedBody);
+            }
+        });
+    };
+
+    module.exports.getSDHView = function getSDHView(vid, options, callback) {
+        var qp;
+        // TODO query params.. only for test by the moment testing /tbdata/view-director-products?uid=1004
+        var uri = getValidAPIUri('tbdata/' + vid + '?uid=' + options.uid);
+        log.debug(uri);
+        request(uri, function(err, resp, body) {
+            if (err || resp.statusCode !== 200) {
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
