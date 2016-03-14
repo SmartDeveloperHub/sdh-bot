@@ -136,6 +136,26 @@ var startTest = function startTest() {
             log.debug('+ success');
         }
     });*/
+
+    log.debug("11. Test getSDHViews:");
+    internalSDHtools.getSDHViews(function(views) {
+        log.debug("11->" + JSON.stringify(views));
+        if (!views || !Array.isArray(views)) {
+            log.error("- sdhBasic.getSDHViews fails!");
+        } else {
+            log.debug('+ success');
+        }
+    });
+
+    log.debug("12. Test getSDHView:");
+    internalSDHtools.getSDHView("view-director-products", {'uid':1004}, function(view) {
+        log.debug("12->" + JSON.stringify(view));
+        if (!view || !view.values || !Array.isArray(view.values) || !view.interval) {
+            log.error("- sdhBasic.getSDHView fails!");
+        } else {
+            log.debug('+ success');
+        }
+    });
 };
 
-bot.init(startTest);
+bot.init('testCore', startTest);
