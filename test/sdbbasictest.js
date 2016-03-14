@@ -97,21 +97,21 @@ var startTest = function startTest() {
         }
     });
 
-    log.debug("8. Test getSDHPRepositories:");
-    internalSDHtools.getSDHPRepositories(function(repositories) {
+    log.debug("8. Test getSDHRepositories:");
+    internalSDHtools.getSDHRepositories(function(repositories) {
         log.debug("8->" + JSON.stringify(repositories));
         if (!repositories || !Array.isArray(repositories)) {
-            log.error("- sdhBasic.getSDHPRepositories fails!");
+            log.error("- sdhBasic.getSDHRepositories fails!");
         } else {
             log.debug('+ success');
         }
     });
 
-    log.debug("9. Test getSDHPRepository:");
-    internalSDHtools.getSDHPRepository(43, {}, function(repository) {
+    log.debug("9. Test getSDHRepository:");
+    internalSDHtools.getSDHRepository(43, {}, function(repository) {
         log.debug("9->" + JSON.stringify(repository));
         if (!repository || !repository.repositoryid || repository.repositoryid !== "43") {
-            log.error("- sdhBasic.getSDHPRepository fails!");
+            log.error("- sdhBasic.getSDHRepository fails!");
         } else {
             log.debug('+ success');
         }
@@ -127,7 +127,7 @@ var startTest = function startTest() {
         }
     });
 
-    /*log.debug("11. Test getSDHOrganization:");
+    /*log.debug("10b. Test getSDHOrganization:");
     internalSDHtools.getSDHOrganization(1, {}, function(org) {
         log.debug("11->" + JSON.stringify(org));
         if (!org || !org.organizationid || org.organizationid !== 1) {
