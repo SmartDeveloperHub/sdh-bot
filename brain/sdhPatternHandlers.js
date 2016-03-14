@@ -221,29 +221,29 @@
         callback (data);
     };
     var allMetrics = function allMetrics(clientId, msg, callback) {
-        callback ("All metrics List");
+        internalSDHtools.getSDHMetrics(callback);
     };
     var allViews = function allViews(clientId, msg, callback) {
-        callback ("All views List");
+        internalSDHtools.getSDHViews(callback);
     };
     var allOrgs = function allOrgs(clientId, msg, callback) {
-        callback ("All organizations List");
+        internalSDHtools.getSDHOrganizations(callback);
     };
     var allProducts = function allProducts(clientId, msg, callback) {
-        callback ("All products List");
+        internalSDHtools.getSDHProducts(callback);
     };
     var allProjects = function allProjects(clientId, msg, callback) {
-        callback ("All projects List");
+        internalSDHtools.getSDHProjects(callback);
     };
     var allRepos = function allRepos(clientId, msg, callback) {
-        callback ("All repositories List");
+        internalSDHtools.getSDHRepositories(callback);
     };
     var allMembers = function allMembers(clientId, msg, callback) {
-        callback ("All members List");
+        internalSDHtools.getSDHMembers(callback);
     };
 
 /* PUBLIC */
-    module.exports.phInfo = {
+    var corePatterns = {
         '/help|ayuda/':{
             'callback': helpme,
             'description': "Return core bot help information"
