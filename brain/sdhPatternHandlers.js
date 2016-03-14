@@ -54,8 +54,46 @@
         internalSDHtools.getSDHOrganizations(callback);
     };
     var product = function product(clientId, msg, callback) {
-        callback ("A product");
+        log.info("product info ---> " + msg.text);
+        var prodList = getProductFromMsg(msg);
+        log.debug(prodList);
+        var pj = [];
+        for (var i = 0; i < prodList.length; i++) {
+            pj.push(sdhProductsByID[prodList[i]]);
+        }
+        var data = {
+            'title': "Product Information",
+            'description': "This is the core bot get product/s information",
+            'data': pj
+        }
+        callback (data);
     };
+
+// Product Aux methods
+    var getProductFromMsg = function getProductFromMsg(msg) {
+        var tags = msg.text.toLowerCase().split(' ');
+        var origTagsAux = msg.text.split(' ');
+        var origTags = [];
+        var auxTags = [];
+        for (var d = 0; d < tags.length; d++) {
+            if (tags[d] !== "" && tags[d] !== "product" && tags[d] !== "producto" && tags[d].indexOf(botId.toLowerCase()) == -1) {
+                auxTags.push(tags[d]);
+                origTags.push(origTagsAux[d]);
+            }
+        }
+        tags = auxTags;
+        log.debug(tags);
+        var data = [];
+        for (var d = 0; d < tags.length; d++) {
+            if (origTags[d] in sdhProductsByID) {
+                data.push(origTags[d]);
+            } else if (origTags[d] in sdhProductsByName){
+                data.push(sdhProductsByName[origTags[d]].productid);
+            }
+        }
+        return data;
+    };
+
     var project = function project(clientId, msg, callback) {
         callback ("A project");
     };
