@@ -95,8 +95,46 @@
     };
 
     var project = function project(clientId, msg, callback) {
-        callback ("A project");
+        log.info("project info ---> " + msg.text);
+        var projList = getProjectFromMsg(msg);
+        log.debug(projList);
+        var pj = [];
+        for (var i = 0; i < projList.length; i++) {
+            pj.push(sdhProjectsByID[projList[i]]);
+        }
+        var data = {
+            'title': "Project Information",
+            'description': "This is the core bot get project/s information",
+            'data': pj
+        }
+        callback (data);
     };
+
+// Project Aux methods
+    var getProjectFromMsg = function getProjectFromMsg(msg) {
+        var tags = msg.text.toLowerCase().split(' ');
+        var origTagsAux = msg.text.split(' ');
+        var origTags = [];
+        var auxTags = [];
+        for (var d = 0; d < tags.length; d++) {
+            if (tags[d] !== "" && tags[d] !== "project" && tags[d] !== "proyecto" && tags[d].indexOf(botId.toLowerCase()) == -1) {
+                auxTags.push(tags[d]);
+                origTags.push(origTagsAux[d]);
+            }
+        }
+        tags = auxTags;
+        log.debug(tags);
+        var data = [];
+        for (var d = 0; d < tags.length; d++) {
+            if (origTags[d] in sdhProjectsByID) {
+                data.push(origTags[d]);
+            } else if (origTags[d] in sdhProjectsByName){
+                data.push(sdhProjectsByName[origTags[d]].projectid);
+            }
+        }
+        return data;
+    };
+
     var repo = function repo(clientId, msg, callback) {
         callback ("A repository");
     };
