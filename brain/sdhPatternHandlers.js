@@ -248,60 +248,61 @@
             'callback': helpme,
             'description': "Return core bot help information"
         },
-        '/metric|metrica/':{
-            'callback': metric,
-            'description': "Return metric data"
-        },
-        '/view|tbd/time based data':{
-            'callback': view,
-            'description': "Return metric data"
-        },
         '/all metrics|todas las metricas/':{
             'callback': allMetrics,
-            'description': "Return complete metrics list"
+            'description': "Return complete SDH metrics list"
         },
         '/all views|all tbds|all time based data|todas las vistas/':{
             'callback': allViews,
-            'description': "Return complete views list"
-        },
-        '/organization|organizacion/':{
-            'callback': org,
-            'description': "Return organization"
-        },
-        '/product|producto/':{
-            'callback': product,
-            'description': "Return product"
-        },
-        '/project|proyecto/':{
-            'callback': project,
-            'description': "Return project"
-        },
-        '/user|usuario|member|miembro/':{
-            'callback': member,
-            'description': "Return member"
-        },
-        '/repository|repositorio/':{
-            'callback': repo,
-            'description': "Return repository"
+            'description': "Return complete SDH views list"
         },
         '/all organizations|todas las organizaciones/':{
             'callback': allOrgs,
-            'description': "Return complete organizations list"
+            'description': "Return complete SDH organizations list"
         },
         '/all products|todos los productos/':{
             'callback': allProducts,
-            'description': "Return complete projects list"
+            'description': "Return complete SDH projects list"
         },
         '/all projects|todos los proyectos/':{
             'callback': allProjects,
-            'description': "Return complete projects list"
+            'description': "Return complete SDH projects list"
         },
         '/all users|todos los usuarios|all members|todos los miembros/':{
             'callback': allMembers,
-            'description': "Return complete products list"
+            'description': "Return complete SDH products list"
         },
         '/all repositories|todos los repositorios/':{
             'callback': allRepos,
-            'description': "Return complete products list"
+            'description': "Return complete SDH products list"
+        },
+        '/organization|organizacion/':{
+            'callback': org,
+            'description': "Return a SDH organization"
+        },
+        '/product|producto/':{
+            'callback': product,
+            'description': "Return a SDH product"
+        },
+        '/project|proyecto/':{
+            'callback': project,
+            'description': "Return a SDH project"
+        },
+        '/user|usuario|member|miembro/':{
+            'callback': member,
+            'description': "Return a SDH member"
+        },
+        '/repository|repositorio/repo':{
+            'callback': repo,
+            'description': "Return a SDH repository"
+        },
+        '/metric|metrica|métrica/':{
+            'callback': metric,
+            'description': "Return SDH metric data"
+        },
+        '/view|tbd|time based data':{
+            'callback': view,
+            'description': "Return SDH view data"
         }
-    }
+    };
+    module.exports.phInfo = corePatterns;
