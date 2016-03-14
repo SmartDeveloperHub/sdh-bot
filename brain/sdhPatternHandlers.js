@@ -24,16 +24,34 @@
 
 /* PRIVATE */
     var helpme = function helpme(clientId, msg, callback) {
-        callback ("COREBOT Help common msg!");
+        var data = [];
+        for (var pat in corePatterns) {
+            data.push(
+                {
+                    title: pat,
+                    text: corePatterns[pat].description,
+                    'thumb': "https://pixabay.com/static/uploads/photo/2013/07/12/18/09/help-153094_960_720.png",
+                    'link': "http://botEndpointOrSomethingSimilar/api/resource/elelele"
+                }
+            );
+        }
+        callback ({
+            'title': "Help Information",
+            'description': "This is the core bot basic methods help information",
+            'data': data
+        });
     };
     var metric = function metric(clientId, msg, callback) {
+        // TODO extract metric id, subjects and range information from msg to generate metric options
         callback ("metric data");
     };
     var view = function view(clientId, msg, callback) {
+        // TODO extract metric id, subjects and range information from msg to generate view options
         callback ("view data");
     };
     var org = function org(clientId, msg, callback) {
-        callback ("A organization");
+        // Not implemented in sdh-api, only 1 organization
+        internalSDHtools.getSDHOrganizations(callback);
     };
     var product = function product(clientId, msg, callback) {
         callback ("A product");
