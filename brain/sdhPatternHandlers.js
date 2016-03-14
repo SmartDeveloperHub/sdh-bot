@@ -136,10 +136,89 @@
     };
 
     var repo = function repo(clientId, msg, callback) {
-        callback ("A repository");
+        log.info("repo info ---> " + msg.text);
+        var repoList = getRepoFromMsg(msg);
+        log.debug(repoList);
+        var rp = [];
+        for (var i = 0; i < repoList.length; i++) {
+            rp.push(sdhReposByID[repoList[i]]);
+        }
+        var data = {
+            'title': "Repository Information",
+            'description': "This is the core bot get rpository/ies information",
+            'data': rp
+        }
+        callback (data);
     };
+
+// Repos Aux methods
+    var getRepoFromMsg = function getRepoFromMsg(msg) {
+        var tags = msg.text.toLowerCase().split(' ');
+        var origTagsAux = msg.text.split(' ');
+        var origTags = [];
+        var auxTags = [];
+        for (var d = 0; d < tags.length; d++) {
+            if (tags[d] !== "" && tags[d] !== "repository" && tags[d] !== "repositorio" && tags[d] !== "repo" && tags[d].indexOf(botId.toLowerCase()) == -1) {
+                auxTags.push(tags[d]);
+                origTags.push(origTagsAux[d]);
+            }
+        }
+        tags = auxTags;
+        log.debug(tags);
+        var repo = [];
+        for (var d = 0; d < tags.length; d++) {
+            if (origTags[d] in sdhReposByID) {
+                repo.push(origTags[d]);
+            } else if (origTags[d] in sdhReposByName){
+                repo.push(sdhReposByName[origTags[d]].repositoryid);
+            }
+        }
+        return repo;
+    };
+
+// Members aux methods
+    var getUsersFromMsg = function getUsersFromMsg(msg) {
+        var tags = msg.text.toLowerCase().split(' ');
+        var origTagsAux = msg.text.split(' ');
+        var origTags = [];
+        var auxTags = [];
+        for (var d = 0; d < tags.length; d++) {
+            if (tags[d] !== "" && tags[d] !== "user" && tags[d] !== "miembro" && tags[d] !== "member" && tags[d] !== "usuario" && tags[d].indexOf(botId.toLowerCase()) == -1) {
+                auxTags.push(tags[d]);
+                origTags.push(origTagsAux[d]);
+            }
+        }
+        tags = auxTags;
+        log.debug(tags);
+        var userList = [];
+        for (var d = 0; d < tags.length; d++) {
+            if (origTags[d] in clientUserInfo) {
+                userList.push(clientUserInfo[origTags[d]]);
+            } else {
+                for (var key in clientUserInfo) {
+                    if (key.indexOf("<@") > -1 && key.indexOf(">") > -1 && key.indexOf(origTags[d]) > -1) {
+                        userList.push(clientUserInfo[key]);
+                    }
+                }
+            }
+        }
+        return userList;
+    };
+
     var member = function member(clientId, msg, callback) {
-        callback ("A member");
+        log.info("member info ---> " + msg.text);
+        var userList = getUsersFromMsg(msg);
+        log.debug(userList);
+        var us = [];
+        for (var i = 0; i < userList.length; i++) {
+            us.push(sdhUsersByID[userList[i]]);
+        }
+        var data = {
+            'title': "User Information",
+            'description': "This is the core bot get member/s information",
+            'data': us
+        }
+        callback (data);
     };
     var allMetrics = function allMetrics(clientId, msg, callback) {
         callback ("All metrics List");
