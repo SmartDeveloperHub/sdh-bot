@@ -298,13 +298,13 @@
         });
     };
 
-    module.exports.getSDHPRepositories = function getSDHPRepositories (callback) {
+    module.exports.getSDHRepositories = function getSDHRepositories (callback) {
         var uri = getValidAPIUri('repositories');
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHPRepositories Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
@@ -312,13 +312,13 @@
         });
     };
 
-    module.exports.getSDHPRepository = function getSDHPRepository (rid, options, callback) {
+    module.exports.getSDHRepository = function getSDHRepository (rid, options, callback) {
         var uri = getValidAPIUri('repositories/' + rid);
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHPRepository Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
@@ -340,17 +340,17 @@
         });
     };
 
-    // This method is not avalable in SDH API by the moment
-    /*module.exports.getSDHOrganization = function getSDHOrganization (oid, options, callback) {
+    // This metod is not avalable in SDH API by the moment
+    module.exports.getSDHOrganization = function getSDHOrganization (oid, options, callback) {
         var uri = getValidAPIUri('organizations/' + oid);
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
-                log.error("sdhBasic.getSDHOrganization Fails: " + resp.statusCode);
-                callback(resp.statusCode);
+                log.error(err);
+                callback(err);
             } else {
                 var parsedBody = JSON.parse(body);
                 callback(parsedBody);
             }
         });
-    };*/
+    };
