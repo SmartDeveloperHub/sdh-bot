@@ -23,65 +23,108 @@
 'use strict';
 
 var bot = require("../sdhbot.js");
-
+var failedTests = 0;
+var testCounter = 0;
+var ActiveTestNumber = 12;
 var startTest = function startTest() {
+    var loadStartDate = moment();
+    var testStatus = function testStatus() {
+        var now = moment();
+        var loadTime = moment.duration(now - loadStartDate).asMilliseconds();
+        log.info("--- Test status ---");
+        log.debug(now.format() + "--- ( " + loadTime / 1000 + " seconds )");
+        log.info((ActiveTestNumber - failedTests) + " success tests");
+        if (failedTests > 0) {
+            log.warn(failedTests + " failed tests");
+        } else {
+            log.info('***   All tests passed!   ***');
+        }
+    };
+
     log.info("** starting sdh Basic Tools async-test **");
 
     log.debug("1. Test getSDHMembers:");
     internalSDHtools.getSDHMembers(function(members) {
+        testCounter++;
         log.debug("1->" + JSON.stringify(members));
         if (!members || !Array.isArray(members)) {
             log.error("- sdhBasic.getSDHMembers fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
     log.debug("2. Test getSDHMetrics:");
     internalSDHtools.getSDHMetrics(function(metrics) {
+        testCounter++;
         log.debug("2->" + JSON.stringify(metrics));
         if (!metrics || !Array.isArray(metrics)) {
             log.error("- sdhBasic.getSDHMetrics fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
     log.debug("3. Test getSDHMetric:");
     internalSDHtools.getSDHMetric("developers", {}, function(metric) {
+        testCounter++;
         log.debug("3->" + JSON.stringify(metric));
         if (!metric || !metric.values || !Array.isArray(metric.values) || !metric.interval) {
             log.error("- sdhBasic.getSDHMetric fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
     log.debug("4. Test getSDHProducts:");
     internalSDHtools.getSDHProducts(function(products) {
+        testCounter++;
         log.debug("4->" + JSON.stringify(products));
         if (!products || !Array.isArray(products)) {
             log.error("- sdhBasic.getSDHProducts fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
     log.debug("5. Test getSDHProduct:");
     internalSDHtools.getSDHProduct("product-sdh-web", {}, function(product) {
+        testCounter++;
         log.debug("5->" + JSON.stringify(product));
         if (!product || !product.productid || product.productid !== "product-sdh-web") {
             log.error("- sdhBasic.getSDHProduct fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
     log.debug("6. Test getSDHProjects:");
     internalSDHtools.getSDHProjects(function(projects) {
+        testCounter++;
         log.debug("6->" + JSON.stringify(projects));
         if (!projects || !Array.isArray(projects)) {
             log.error("- sdhBasic.getSDHProjects fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
         }
@@ -89,19 +132,26 @@ var startTest = function startTest() {
 
     log.debug("7. Test getSDHProject:");
     internalSDHtools.getSDHProject("project-sdh-web", {}, function(project) {
+        testCounter++;
         log.debug("7->" + JSON.stringify(project));
         if (!project || !project.projectid || project.projectid !== "project-sdh-web") {
             log.error("- sdhBasic.getSDHProject fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
     log.debug("8. Test getSDHRepositories:");
     internalSDHtools.getSDHRepositories(function(repositories) {
+        testCounter++;
         log.debug("8->" + JSON.stringify(repositories));
         if (!repositories || !Array.isArray(repositories)) {
             log.error("- sdhBasic.getSDHRepositories fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
         }
@@ -109,21 +159,31 @@ var startTest = function startTest() {
 
     log.debug("9. Test getSDHRepository:");
     internalSDHtools.getSDHRepository(43, {}, function(repository) {
+        testCounter++;
         log.debug("9->" + JSON.stringify(repository));
         if (!repository || !repository.repositoryid || repository.repositoryid !== "43") {
             log.error("- sdhBasic.getSDHRepository fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
     log.debug("10. Test getSDHOrganizations:");
     internalSDHtools.getSDHOrganizations(function(org) {
+        testCounter++;
         log.debug("10->" + JSON.stringify(org));
         if (!org || !Array.isArray(org)) {
             log.error("- sdhBasic.getSDHOrganizations fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
@@ -139,21 +199,31 @@ var startTest = function startTest() {
 
     log.debug("11. Test getSDHViews:");
     internalSDHtools.getSDHViews(function(views) {
+        testCounter++;
         log.debug("11->" + JSON.stringify(views));
         if (!views || !Array.isArray(views)) {
             log.error("- sdhBasic.getSDHViews fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 
     log.debug("12. Test getSDHView:");
     internalSDHtools.getSDHView("view-director-products", {'uid':1004}, function(view) {
+        testCounter++;
         log.debug("12->" + JSON.stringify(view));
         if (!view || !view.values || !Array.isArray(view.values) || !view.interval) {
             log.error("- sdhBasic.getSDHView fails!");
+            failedTests++;
         } else {
             log.debug('+ success');
+        }
+        if (ActiveTestNumber == testCounter) {
+            testStatus();
         }
     });
 };
