@@ -324,68 +324,116 @@
     var allMembers = function allMembers(clientId, msg, callback) {
         internalSDHtools.getSDHMembers(callback);
     };
+    var sdhParser = function sdhParser(clientId, msg, callback) {
+
+        var origTagsAux = msg.text.split(' ');
+        var origTags = [];
+        for (var d = 0; d < origTagsAux.length; d++) {
+            //TODO
+            if (origTagsAux[d] !== "" && origTagsAux[d] !== "elastic" && origTagsAux[d].indexOf(botId.toLowerCase()) == -1) {
+                origTags.push(origTagsAux[d]);
+            }
+        }
+        /*elastic.getSuggestions(origTags).then(function (result) {
+            log.info("--Result for: " + origTags);
+            for (var i = 0; i < result.docsuggest[0].options.length; i++) {
+                log.info("elasticSearch: '" + result.docsuggest[0].options[i].text + "' --score:" + result.docsuggest[0].options[i].score);
+            }
+        });*/
+        elastic.search(msg.text, indexName).then(function (result) {
+            log.info("-Simple E.S search for: " + msg.text);
+            for (var i = 0; i < result.hits.hits.length; i++) {
+                log.debug("hit " + i + ": '" + result.hits.hits[i]._source.title + "' ;score: " + result.hits.hits[i]._score);
+            }
+        });
+    };
+
+    var parseTags = function parseTags(msg) {
+        var origTagsAux = msg.split(' ');
+        var origTags = [];
+        for (var d = 0; d < origTagsAux.length; d++) {
+            //TODO
+            if (origTagsAux[d] !== "") {
+                origTags.push(origTagsAux[d]);
+            }
+        }
+        return origTags;
+    };
 
 /* PUBLIC */
     var corePatterns = {
-        '/help|ayuda/':{
+        '/help/':{
             'callback': helpme,
             'description': "Return core bot help information"
         },
-        '/all metrics|todas las metricas/':{
+        '/give me all metrics/':{
             'callback': allMetrics,
             'description': "Return complete SDH metrics list"
         },
-        '/all views|all tbds|all time based data|todas las vistas/':{
+        '/give me metrics about [\\s\\S]+/':{
+            'callback': allMetrics,
+            'description': "Return complete SDH metrics list"
+        },
+        '/give me [\\s\\S]+ metrics/':{
+            'callback': getMetricsAbout,
+            'description': "Return complete SDH metrics list"
+        },
+        '/give me all views/':{
             'callback': allViews,
             'description': "Return complete SDH views list"
         },
-        '/all organizations|todas las organizaciones/':{
+        '/give me all organizations/':{
             'callback': allOrgs,
             'description': "Return complete SDH organizations list"
         },
-        '/all products|todos los productos/':{
+        '/give me all products/':{
             'callback': allProducts,
             'description': "Return complete SDH projects list"
         },
-        '/all projects|todos los proyectos/':{
+        '/give me all projects/':{
             'callback': allProjects,
             'description': "Return complete SDH projects list"
         },
-        '/all users|todos los usuarios|all members|todos los miembros/':{
+        '/give me all users|give me all members/':{
             'callback': allMembers,
             'description': "Return complete SDH products list"
         },
-        '/all repositories|todos los repositorios/':{
+        '/give me all repositories/':{
             'callback': allRepos,
             'description': "Return complete SDH products list"
         },
-        '/organization|organizacion/':{
-            'callback': org,
-            'description': "Return a SDH organization"
-        },
-        '/product|producto/':{
+        /*'/give me [\\s\\S]+ information/':{
+            'callback': allRepos,
+            'description': "Return complete SDH products list"
+        },*/
+        '/give me [\\s\\S]+ product':{
             'callback': product,
             'description': "Return a SDH product"
         },
-        '/project|proyecto/':{
+        '/give me [\\s\\S]+ project/':{
             'callback': project,
             'description': "Return a SDH project"
         },
-        '/user|usuario|member|miembro/':{
+        '/give me [\\s\\S]+ user|give me [\\s\\S]+ member/':{
             'callback': member,
             'description': "Return a SDH member"
         },
-        '/repository|repositorio/repo':{
+        '/give me [\\s\\S]+ repository|give me [\\s\\S]+ repo/':{
             'callback': repo,
             'description': "Return a SDH repository"
         },
-        '/metric|metrica|métrica/':{
+        '/give me [\\s\\S]+ metric/':{
             'callback': metric,
             'description': "Return SDH metric data"
         },
-        '/view|tbd|time based data':{
+        '/give me [\\s\\S]+ view/':{
             'callback': view,
             'description': "Return SDH view data"
-        }
+        },
+        //'/[a-zA-Z]+/':{
+        /*'/[\\s\\S]/':{
+            'callback': sdhParser,
+            'description': "Return elastic matching info"
+        }*/
     };
     module.exports.phInfo = corePatterns;
