@@ -161,6 +161,99 @@
         });
     };
 
+    var startESindex = function startESindex() {
+        //TODO
+        var sdhUsersByID_ = {};
+        var cleanIndex = [
+            elastic.indexExists("users").then(function (exists) {
+                if (exists) {
+                    return elastic.deleteIndex("users");
+                }
+            }).then(function () {
+                return elastic.initIndex("users").then(function() {
+                        return elastic.initMapping("users");
+                    })
+            }),
+            elastic.indexExists("products").then(function (exists) {
+                if (exists) {
+                    return elastic.deleteIndex("products");
+                }
+            }).then(function () {
+                return elastic.initIndex("products").then(function() {
+                    return elastic.initMapping("products");
+                })
+            }),
+            elastic.indexExists("projects").then(function (exists) {
+                if (exists) {
+                    return elastic.deleteIndex("projects");
+                }
+            }).then(function () {
+                return elastic.initIndex("projects").then(function() {
+                    return elastic.initMapping("projects");
+                })
+            }),
+            elastic.indexExists("repositories").then(function (exists) {
+                if (exists) {
+                    return elastic.deleteIndex("repositories");
+                }
+            }).then(function () {
+                return elastic.initIndex("repositories").then(function () {
+                    return elastic.initMapping("repositories");
+                })
+            })
+        ];
+        var getEntities = [
+            //Members
+            internalSDHtools.getSDHMembers(function (members) {
+                members.map(function (dat) {
+                    sdhUsersByID_[dat.userid] = dat;
+                    return elastic.addDocument(dat, indexName);
+                });
+                for (var i = 0; i < members.length; i++) {
+                    sdhUsersByID[members[i].userid] = members[i];
+                }
+                log.info(sdhUsersByID)
+                return members.all(members);
+            }),
+            //Repositories
+            internalSDHtools.getSDHRepositories(function (rep) {
+                for (var i = 0; i < rep.length; i++) {
+                    sdhReposByID[rep[i].repositoryid] = rep[i];
+                    sdhReposByName[rep[i].name] = rep[i];
+                }
+            }),
+            //Products
+            internalSDHtools.getSDHProducts(function (prod) {
+                for (var i = 0; i < prod.length; i++) {
+                    sdhProductsByID[prod[i].productid] = prod[i];
+                }
+            }),
+            //Projects
+            internalSDHtools.getSDHProjects(function (proj) {
+                for (var i = 0; i < proj.length; i++) {
+                    sdhProjectsByID[proj[i].projectid] = proj[i];
+                }
+            }),
+            //Organizations
+            internalSDHtools.getSDHOrganizations(function (org) {
+                for (var i = 0; i < org.length; i++) {
+                    // By the moment there are no organizationid in the unique Organization info in SDH
+                    //sdhOrganizationsByID[org[i].organizationid] = org[i];
+                    sdhOrganizationsByID[org[i].title] = org[i];
+                }
+            })
+        ];
+
+        Promise.all(cleanIndex).all(getEntities).then(function () {
+                log.info("elasticTools enable");
+            }
+        ).catch(function(err) {
+            log.info("error loading data into Elastic Search");
+            log.error(err);
+        });
+    };
+
+
     GLOBAL.internalSDHtools = require('./brain/sdhBasic.js');
     GLOBAL.sdhPatternHandlers = require('./brain/sdhPatternHandlers.js');
     exports.knownPatterns = sdhPatternHandlers.phInfo;
