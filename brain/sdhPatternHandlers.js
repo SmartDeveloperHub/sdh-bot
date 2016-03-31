@@ -75,11 +75,22 @@
         var origTagsAux = msg.text.split(' ');
         var origTags = [];
         var auxTags = [];
+        var customTag = "";
         for (var d = 0; d < tags.length; d++) {
             if (tags[d] !== "" && tags[d] !== "product" && tags[d] !== "producto" && tags[d].indexOf(botId.toLowerCase()) == -1) {
                 auxTags.push(tags[d]);
                 origTags.push(origTagsAux[d]);
+                if (customTag.length > 0) {customTag += " ";}
+                customTag += tags[d];
+            } else {
+                if (customTag.length > 0) {
+                    auxTags.push(customTag);
+                }
+                customTag = "";
             }
+        }
+        if (customTag.length > 0) {
+            auxTags.push(customTag);
         }
         tags = auxTags;
         log.debug(tags);
@@ -116,11 +127,22 @@
         var origTagsAux = msg.text.split(' ');
         var origTags = [];
         var auxTags = [];
+        var customTag = "";
         for (var d = 0; d < tags.length; d++) {
             if (tags[d] !== "" && tags[d] !== "project" && tags[d] !== "proyecto" && tags[d].indexOf(botId.toLowerCase()) == -1) {
                 auxTags.push(tags[d]);
                 origTags.push(origTagsAux[d]);
+                if (customTag.length > 0) {customTag += " ";}
+                customTag += tags[d];
+            } else {
+                if (customTag.length > 0) {
+                    auxTags.push(customTag);
+                }
+                customTag = "";
             }
+        }
+        if (customTag.length > 0) {
+            auxTags.push(customTag);
         }
         tags = auxTags;
         log.debug(tags);
@@ -157,11 +179,22 @@
         var origTagsAux = msg.text.split(' ');
         var origTags = [];
         var auxTags = [];
+        var customTag = "";
         for (var d = 0; d < tags.length; d++) {
             if (tags[d] !== "" && tags[d] !== "repository" && tags[d] !== "repositorio" && tags[d] !== "repo" && tags[d].indexOf(botId.toLowerCase()) == -1) {
                 auxTags.push(tags[d]);
                 origTags.push(origTagsAux[d]);
+                if (customTag.length > 0) {customTag += " ";}
+                customTag += tags[d];
+            } else {
+                if (customTag.length > 0) {
+                    auxTags.push(customTag);
+                }
+                customTag = "";
             }
+        }
+        if (customTag.length > 0) {
+            auxTags.push(customTag);
         }
         tags = auxTags;
         log.debug(tags);
@@ -182,11 +215,22 @@
         var origTagsAux = msg.text.split(' ');
         var origTags = [];
         var auxTags = [];
+        var customTag = "";
         for (var d = 0; d < tags.length; d++) {
             if (tags[d] !== "" && tags[d] !== "user" && tags[d] !== "miembro" && tags[d] !== "member" && tags[d] !== "usuario" && tags[d].indexOf(botId.toLowerCase()) == -1) {
                 auxTags.push(tags[d]);
                 origTags.push(origTagsAux[d]);
+                if (customTag.length > 0) {customTag += " ";}
+                customTag += tags[d];
+            } else {
+                if (customTag.length > 0) {
+                    auxTags.push(customTag);
+                }
+                customTag = "";
             }
+        }
+        if (customTag.length > 0) {
+            auxTags.push(customTag);
         }
         tags = auxTags;
         log.debug(tags);
