@@ -45,6 +45,45 @@
         // TODO extract metric id, subjects and range information from msg to generate metric options
         callback ("metric data");
     };
+    var getMetricsAbout = function getMetricsAbout(clientId, msg, callback) {
+        log.info("metric abut query ---> " + msg.text);
+        var tags = msg.text.toLowerCase().split(' ');
+        var auxTags = [];
+        for (var d = 0; d < tags.length; d ++) {
+            if (tags[d] !== "" && tags[d] !== "metrics" && tags[d] !== "give" && tags[d] !== "me" && tags[d] !== "about") {
+                auxTags.push(tags[d]);
+            }
+        }
+        tags = auxTags;
+        var parsedElements = [];
+        internalSDHtools.getSDHMetrics(function(allmet) {
+            for (var i = 0; i < allmet.length; i++) {
+                var metric = allmet[i];
+                var refAtt = metric.title.toLowerCase(); // Views have not titles
+                if (tags.length == 0) {
+                    // All
+                    parsedElements.push(refAtt);
+                } else {
+                    // Tag filter
+                    var match = false;
+                    for (var j = 0; j < tags.length; j++) {
+                        if (refAtt.indexOf(tags[j]) == -1) {
+                            match = false;
+                            break;
+                        } else {
+                            match = true;
+                        }
+                    }
+                    if (match) {
+                        parsedElements.push(metric);
+                    }
+                }
+
+            };
+            callback(parsedElements);
+        });
+    };
+
     var view = function view(clientId, msg, callback) {
         // TODO extract metric id, subjects and range information from msg to generate view options
         callback ("view data");
