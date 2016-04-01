@@ -21,39 +21,34 @@
 */
 'use strict';
 
-    var loadStartDate = new Date();
-    try {
-        // global buyan
-        var bunyan = require('bunyan');
-        var PrettyStream = require('bunyan-prettystream');
-    } catch (err) {
-        console.error("Bot Error. bunyan logs problem: " + err);
-    }
-    try {
-        // Set Config params
-        require('./config');
-    } catch (err) {
-        console.error("Fatal BOT Error with config: " + err);
-        setTimeout(function() {
+var Promise = require("promise");
+
+module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
+
+    var _exports = {};
+
+    var init = function() {
+
+        var validUrl = require('valid-url');
+
+        if (!validUrl.isUri(sdhApiUrl)){
+            log.error("Not valid SDH_API_URL: " + sdhApiUrl);
             process.exit(0);
-        }, 1000);
-    }
+        }
 
-    // Shut down function
-    var gracefullyShuttinDown = function gracefullyShuttinDown() {
-        log.warn('Shut down signal Received ');
-        log.warn(" ! Shutting Down SDH-API manually.");
-        setTimeout(function () {
+        if (!validUrl.isUri(sdhDashboardUrl)){
+            log.error("Not valid SDH_DASHBOARD_URL: " + sdhDashboardUrl);
             process.exit(0);
-        }, 500);
-    };
+        }
 
-    // Set security handlers
-    process.on('SIGINT', gracefullyShuttinDown);
-    process.on('SIGTERM', gracefullyShuttinDown);
+        GLOBAL.SDH_API_URL = sdhApiUrl;
+        GLOBAL.SDH_DASHBOARD_URL = sdhDashboardUrl;
+        GLOBAL.clientUserInfo = null; //TODO: remove
+        GLOBAL.elastic = null; //TODO: move all elastic methods to other file
 
-    var init = function init(botID, callback) {
-        exports.id = botID;
+        var loadStartDate = new Date();
+
+        _exports.id = botID;
         GLOBAL.botId = botID;
         GLOBAL.sdhProjectsByID = {};
         GLOBAL.sdhProjectsByName = {};
@@ -64,59 +59,53 @@
         GLOBAL.sdhProductsByName = {};
         GLOBAL.sdhUsersByID = {};
         GLOBAL.sdhOrganizationsByID = {};
-        /* File Log */
-        var prettyStdOut = new PrettyStream();
-        prettyStdOut.pipe(process.stdout);
-        GLOBAL.log = null;
-        GLOBAL.mkdirp = require("mkdirp");
-        var ready = false;
-        var getDirName = require("path").dirname;
-        mkdirp(getDirName(FILE_LOG_PATH), function (err) {
-            if (err) {
-                console.error("! Log file disabled");
-                console.error("Error creating log file " +  FILE_LOG_PATH);
-                console.error(err);
-            } else {
-                log = bunyan.createLogger({
-                        name: 'SDH-BOT',
-                        streams: [{
-                            level: CONSOLE_LOG_LEVEL,
-                            stream: prettyStdOut
-                        },
-                        {
-                            level: FILE_LOG_LEVEL,
-                            type: 'rotating-file',
-                            path: FILE_LOG_PATH,
-                            period: FILE_LOG_PERIOD + 'h',
-                            count: FILE_LOG_NFILES
-                        }]
-                });
-                log.info("... Loading SDH BOT CORE ...");
-                try {
-                    GLOBAL.moment = require("moment");
-                    GLOBAL.request = require('request');
-                } catch (err) {
-                    log.error(" ! Error loading dependencies: " + err);
-                    log.info('Exiting...');
-                    setTimeout(function () {
-                        process.exit(0);
-                    }, 500);
-                }
-                log.info('...starting...');
-                //var oldBots = require('./brain/botinterfaces.js');
-                log.info('...OK...');
-                // take SDHMembers
-                preloadEntityIds(callback);
-            }
-        });
+
+        log.info("... Loading SDH BOT CORE ...");
+        try {
+            GLOBAL.moment = require("moment");
+            GLOBAL.request = require('request');
+        } catch (err) {
+            log.error(" ! Error loading dependencies: " + err);
+            log.info('Exiting...');
+            setTimeout(function () {
+                process.exit(0);
+            }, 500);
+        }
+
+        log.info('...starting...');
+        //var oldBots = require('./brain/botinterfaces.js');
+        log.info('...OK...');
+        // take SDHMembers
+
+        GLOBAL.internalSDHtools = require('./brain/sdhBasic.js')(log);
+        GLOBAL.sdhPatternHandlers = require('./brain/sdhPatternHandlers.js')(log);
+        _exports.knownPatterns = sdhPatternHandlers.phInfo;
+        // Export SDH Functions
+        for (var meth in internalSDHtools) {
+            _exports[meth] = internalSDHtools[meth];
+        }
+
+        return Promise.denodeify(preloadEntityIds)();
+
+    };
+
+    // Shut down function
+    var gracefullyShuttinDown = function gracefullyShuttinDown() {
+        log.warn('Shut down signal Received ');
+        log.warn(" ! Shutting Down SDH-API manually.");
+        setTimeout(function () {
+            process.exit(0);
+        }, 500);
     };
 
     var preloadEntityIds = function preloadEntityIds(cb) {
+        log.info("entra");
         var rcounter = 0;
         var endLoad = function endLoad() {
+
             rcounter++;
             if (rcounter == 5) {
-                cb();
+                cb(null, _exports);
             } else if(rcounter > 5) {
                 log.debug('Concurr error sdhbot.preloadEntityIds');
             }
@@ -171,8 +160,8 @@
                 }
             }).then(function () {
                 return elastic.initIndex("users").then(function() {
-                        return elastic.initMapping("users");
-                    })
+                    return elastic.initMapping("users");
+                })
             }),
             elastic.indexExists("products").then(function (exists) {
                 if (exists) {
@@ -248,40 +237,13 @@
                 log.info("elasticTools enable");
             }
         ).catch(function(err) {
-            log.info("error loading data into Elastic Search");
-            log.error(err);
-        });
+                log.info("error loading data into Elastic Search");
+                log.error(err);
+            });
     };
 
+    return init();
 
-    GLOBAL.internalSDHtools = require('./brain/sdhBasic.js');
-    GLOBAL.sdhPatternHandlers = require('./brain/sdhPatternHandlers.js');
-    exports.knownPatterns = sdhPatternHandlers.phInfo;
-    // Export SDH Functions
-    for (var meth in internalSDHtools) {
-        exports[meth] = internalSDHtools[meth];
-    }
+};
 
-    // Export init
-    exports.init = init;
 
-    // Config
-    var validUrl = require('valid-url');
-    exports.setSdhApiUrl = function setSdhApiUrl(uri) {
-        SDH_API_URL = uri;
-        if (!validUrl.isUri(SDH_API_URL)){
-            log.error("Not valid SDH_API_URL: " + SDH_API_URL);
-            process.exit(0);
-        }
-    };
-    exports.setSdhDashboardUrl = function setSdhDashboardUrl(uri) {
-        SDH_DASHBOARD_URL = uri;
-        if (!validUrl.isUri(SDH_DASHBOARD_URL)){
-            log.error("Not valid SDH_DASHBOARD_URL: " + SDH_API_URL);
-            process.exit(0);
-        }
-    };
-    GLOBAL.clientUserInfo = {};
-    exports.setMembersIdRel = function setMembersIdRel(matchingObj) {
-        clientUserInfo = matchingObj;
-    };

@@ -21,14 +21,14 @@
   "main": "sdhbot.js",
   "dependencies": {
     "mkdirp": "*",
-    "moment": "^2.10.3",
+    "moment": "*",
     "bunyan": "*",
     "bunyan-prettystream": "*",
     "request": "*",
-    "moment": "*",
     "google-images": "*",
     "valid-url": "*",
     "botkit": "*",
-    "node-telegram-bot-api": "*"
+    "node-telegram-bot-api": "*",
+    "promise": "~7.1.1"
   }
 }

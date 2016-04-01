@@ -21,6 +21,11 @@
 */
 
 'use strict';
+
+module.exports = function(log) {
+
+    var _exports = {};
+
     /* PRIVATE */
     var getValidAPIUri = function getValidAPIUri(path) {
         var a = SDH_API_URL;
@@ -85,7 +90,7 @@
                     // position
                     var pos;
                     switch (mi.positionsByOrgId[1][0]) { // By de moment only 1 org and only 1 position for each org
-                         case 1 :
+                        case 1 :
                             pos = 'Director';
                             break;
                         case 2 :
@@ -168,7 +173,7 @@
     };
 
     /* PUBLIC */
-    module.exports.getSDHMembers = function getSDHMembers(callback) {
+    _exports.getSDHMembers = function getSDHMembers(callback) {
         var uri = getValidAPIUri('users');
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -182,7 +187,7 @@
         });
     };
 
-    module.exports.getSDHMetrics = function getSDHMetrics(callback) {
+    _exports.getSDHMetrics = function getSDHMetrics(callback) {
         var uri = getValidAPIUri('metrics');
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -196,7 +201,7 @@
         });
     };
 
-    module.exports.getSDHMetric = function getSDHMetric(mid, options, callback) {
+    _exports.getSDHMetric = function getSDHMetric(mid, options, callback) {
         var qp;
         // TODO query params
         var uri = getValidAPIUri('metrics/' + mid);
@@ -212,7 +217,7 @@
         });
     };
 
-    module.exports.getSDHViews = function getSDHViews(callback) {
+    _exports.getSDHViews = function getSDHViews(callback) {
         var uri = getValidAPIUri('tbdata/');
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -226,7 +231,7 @@
         });
     };
 
-    module.exports.getSDHView = function getSDHView(vid, options, callback) {
+    _exports.getSDHView = function getSDHView(vid, options, callback) {
         var qp;
         // TODO query params.. only for test by the moment testing /tbdata/view-director-products?uid=1004
         var uri = getValidAPIUri('tbdata/' + vid + '?uid=' + options.uid);
@@ -242,7 +247,7 @@
         });
     };
 
-    module.exports.getSDHProducts = function getSDHProducts (callback) {
+    _exports.getSDHProducts = function getSDHProducts (callback) {
         var uri = getValidAPIUri('products');
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -256,7 +261,7 @@
         });
     };
 
-    module.exports.getSDHProduct = function getSDHProduct (prid, options, callback) {
+    _exports.getSDHProduct = function getSDHProduct (prid, options, callback) {
         var uri = getValidAPIUri('products/' + prid);
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -270,7 +275,7 @@
         });
     };
 
-    module.exports.getSDHProjects = function getSDHProjects (callback) {
+    _exports.getSDHProjects = function getSDHProjects (callback) {
         var uri = getValidAPIUri('projects');
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -284,7 +289,7 @@
         });
     };
 
-    module.exports.getSDHProject = function getSDHProject (pjid, options, callback) {
+    _exports.getSDHProject = function getSDHProject (pjid, options, callback) {
         var uri = getValidAPIUri('projects/' + pjid);
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -298,7 +303,7 @@
         });
     };
 
-    module.exports.getSDHRepositories = function getSDHRepositories (callback) {
+    _exports.getSDHRepositories = function getSDHRepositories (callback) {
         var uri = getValidAPIUri('repositories');
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -312,7 +317,7 @@
         });
     };
 
-    module.exports.getSDHRepository = function getSDHRepository (rid, options, callback) {
+    _exports.getSDHRepository = function getSDHRepository (rid, options, callback) {
         var uri = getValidAPIUri('repositories/' + rid);
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -326,7 +331,7 @@
         });
     };
 
-    module.exports.getSDHOrganizations = function getSDHOrganizations (callback) {
+    _exports.getSDHOrganizations = function getSDHOrganizations (callback) {
         var uri = getValidAPIUri('organization');
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -341,7 +346,7 @@
     };
 
     // This metod is not avalable in SDH API by the moment
-    module.exports.getSDHOrganization = function getSDHOrganization (oid, options, callback) {
+    _exports.getSDHOrganization = function getSDHOrganization (oid, options, callback) {
         var uri = getValidAPIUri('organizations/' + oid);
         log.debug(uri);
         request(uri, function(err, resp, body) {
@@ -354,3 +359,8 @@
             }
         });
     };
+
+    return _exports;
+
+}
+

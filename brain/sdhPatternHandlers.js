@@ -22,7 +22,11 @@
 
 'use strict';
 
-/* PRIVATE */
+module.exports = function(log) {
+
+    var _exports = {};
+
+    /* PRIVATE */
     var helpme = function helpme(clientId, msg, callback) {
         var data = [];
         for (var pat in corePatterns) {
@@ -58,7 +62,8 @@
         var parsedElements = [];
         internalSDHtools.getSDHMetrics(function(allmet) {
             for (var i = 0; i < allmet.length; i++) {
-                var metric = allmet[i];
+
+                var metric = allmet[i]; if(!metric.title) log.info(JSON.stringify(metric));
                 var refAtt = metric.title.toLowerCase(); // Views have not titles
                 if (tags.length == 0) {
                     // All
@@ -335,11 +340,11 @@
             }
         }
         /*elastic.getSuggestions(origTags).then(function (result) {
-            log.info("--Result for: " + origTags);
-            for (var i = 0; i < result.docsuggest[0].options.length; i++) {
-                log.info("elasticSearch: '" + result.docsuggest[0].options[i].text + "' --score:" + result.docsuggest[0].options[i].score);
-            }
-        });*/
+         log.info("--Result for: " + origTags);
+         for (var i = 0; i < result.docsuggest[0].options.length; i++) {
+         log.info("elasticSearch: '" + result.docsuggest[0].options[i].text + "' --score:" + result.docsuggest[0].options[i].score);
+         }
+         });*/
         elastic.search(msg.text, indexName).then(function (result) {
             log.info("-Simple E.S search for: " + msg.text);
             for (var i = 0; i < result.hits.hits.length; i++) {
@@ -360,7 +365,7 @@
         return origTags;
     };
 
-/* PUBLIC */
+    /* PUBLIC */
     var corePatterns = {
         '/help/':{
             'callback': helpme,
@@ -403,9 +408,9 @@
             'description': "Return complete SDH products list"
         },
         /*'/give me [\\s\\S]+ information/':{
-            'callback': allRepos,
-            'description': "Return complete SDH products list"
-        },*/
+         'callback': allRepos,
+         'description': "Return complete SDH products list"
+         },*/
         '/give me [\\s\\S]+ product':{
             'callback': product,
             'description': "Return a SDH product"
@@ -432,8 +437,14 @@
         },
         //'/[a-zA-Z]+/':{
         /*'/[\\s\\S]/':{
-            'callback': sdhParser,
-            'description': "Return elastic matching info"
-        }*/
+         'callback': sdhParser,
+         'description': "Return elastic matching info"
+         }*/
     };
-    module.exports.phInfo = corePatterns;
+
+    _exports.phInfo = corePatterns;
+
+    return _exports;
+
+}
+
