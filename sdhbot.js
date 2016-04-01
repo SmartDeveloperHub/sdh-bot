@@ -25,7 +25,7 @@ var Promise = require("promise");
 
 module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
 
-    var _exports = {};
+    var core = {};
 
     var init = function() {
 
@@ -48,7 +48,7 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
 
         var loadStartDate = new Date();
 
-        _exports.id = botID;
+        core.id = botID;
         GLOBAL.botId = botID;
         GLOBAL.sdhProjectsByID = {};
         GLOBAL.sdhProjectsByName = {};
@@ -77,12 +77,14 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
         log.info('...OK...');
         // take SDHMembers
 
-        GLOBAL.internalSDHtools = require('./brain/sdhBasic.js')(log);
-        GLOBAL.sdhPatternHandlers = require('./brain/sdhPatternHandlers.js')(log);
-        _exports.knownPatterns = sdhPatternHandlers.phInfo;
+        GLOBAL.internalSDHtools = require('./brain/sdhBasic.js')(log); //TODO: move to core.sdh
+
+        // Load core operations into the core object
+        core.ops = require('./brain/operations.js')(log);
+
         // Export SDH Functions
         for (var meth in internalSDHtools) {
-            _exports[meth] = internalSDHtools[meth];
+            core[meth] = internalSDHtools[meth];
         }
 
         return Promise.denodeify(preloadEntityIds)();
@@ -105,7 +107,7 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
 
             rcounter++;
             if (rcounter == 5) {
-                cb(null, _exports);
+                cb(null, core);
             } else if(rcounter > 5) {
                 log.debug('Concurr error sdhbot.preloadEntityIds');
             }
