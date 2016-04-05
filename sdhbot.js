@@ -87,6 +87,12 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
             core[meth] = internalSDHtools[meth];
         }
 
+        // Export directive functions
+        var directives = require('./brain/directives.js')(log);
+        for (meth in directives) {
+            core[meth] = directives[meth];
+        }
+
         return Promise.denodeify(preloadEntityIds)();
 
     };

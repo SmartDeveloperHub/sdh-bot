@@ -27,8 +27,8 @@ module.exports = function(log) {
     //TODO: adapt all methods to receive parameters instead of a msg and then try to obtain the parameters from it
 
     /* PRIVATE */
-    var helpme = function helpme(clientId, msg, callback) {
-        var data = [];
+    var helpme = function helpme(callback) { //TODO: move this method to the interface
+        var data = [], corePatterns = {};
         for (var pat in corePatterns) {
             data.push(
                 {
@@ -45,25 +45,22 @@ module.exports = function(log) {
             'data': data
         });
     };
-    var metric = function metric(clientId, msg, callback) {
+    var metric = function metric(callback, text) {
         // TODO extract metric id, subjects and range information from msg to generate metric options
         callback ("metric data");
     };
-    var getMetricsAbout = function getMetricsAbout(clientId, msg, callback) {
-        log.info("metric abut query ---> " + msg.text);
-        var tags = msg.text.toLowerCase().split(' ');
-        var auxTags = [];
-        for (var d = 0; d < tags.length; d ++) {
-            if (tags[d] !== "" && tags[d] !== "metrics" && tags[d] !== "give" && tags[d] !== "me" && tags[d] !== "about") {
-                auxTags.push(tags[d]);
-            }
-        }
-        tags = auxTags;
+    var getMetricsAbout = function getMetricsAbout(callback, text) {
+        log.info("metric about query ---> " + text);
+        var tags = text.toLowerCase().split(' ');
         var parsedElements = [];
         internalSDHtools.getSDHMetrics(function(allmet) {
             for (var i = 0; i < allmet.length; i++) {
 
-                var metric = allmet[i]; if(!metric.title) log.info(JSON.stringify(metric));
+                var metric = allmet[i];
+                if(!metric.title) {
+                    log.warn("No title in metric: " + JSON.stringify(metric));
+                    metric.title = "";
+                }
                 var refAtt = metric.title.toLowerCase(); // Views have not titles
                 if (tags.length == 0) {
                     // All
@@ -89,17 +86,14 @@ module.exports = function(log) {
         });
     };
 
-    var view = function view(clientId, msg, callback) {
+    var view = function view(callback, text) {
         // TODO extract metric id, subjects and range information from msg to generate view options
         callback ("view data");
     };
-    var org = function org(clientId, msg, callback) {
-        // Not implemented in sdh-api, only 1 organization
-        internalSDHtools.getSDHOrganizations(callback);
-    };
-    var product = function product(clientId, msg, callback) {
-        log.info("product info ---> " + msg.text);
-        var prodList = getProductFromMsg(msg);
+
+    var product = function product(callback, text) {
+        log.info("product info ---> " + text);
+        var prodList = getProductFromText(text);
         log.debug(prodList);
         var pj = [];
         for (var i = 0; i < prodList.length; i++) {
@@ -114,44 +108,24 @@ module.exports = function(log) {
     };
 
 // Product Aux methods
-    var getProductFromMsg = function getProductFromMsg(msg) {
-        var tags = msg.text.toLowerCase().split(' ');
-        var origTagsAux = msg.text.split(' ');
-        var origTags = [];
-        var auxTags = [];
-        var customTag = "";
-        for (var d = 0; d < tags.length; d++) {
-            if (tags[d] !== "" && tags[d] !== "product" && tags[d] !== "producto" && tags[d].indexOf(botId.toLowerCase()) == -1) {
-                auxTags.push(tags[d]);
-                origTags.push(origTagsAux[d]);
-                if (customTag.length > 0) {customTag += " ";}
-                customTag += tags[d];
-            } else {
-                if (customTag.length > 0) {
-                    auxTags.push(customTag);
-                }
-                customTag = "";
-            }
-        }
-        if (customTag.length > 0) {
-            auxTags.push(customTag);
-        }
-        tags = auxTags;
+    var getProductFromText = function getProductFromText(text) {
+        var tags = text.toLowerCase().split(' ');
+
         log.debug(tags);
         var data = [];
         for (var d = 0; d < tags.length; d++) {
-            if (origTags[d] in sdhProductsByID) {
-                data.push(origTags[d]);
-            } else if (origTags[d] in sdhProductsByName){
-                data.push(sdhProductsByName[origTags[d]].productid);
+            if (tags[d] in sdhProductsByID) {
+                data.push(tags[d]);
+            } else if (tags[d] in sdhProductsByName){
+                data.push(sdhProductsByName[tags[d]].productid);
             }
         }
         return data;
     };
 
-    var project = function project(clientId, msg, callback) {
-        log.info("project info ---> " + msg.text);
-        var projList = getProjectFromMsg(msg);
+    var project = function project(callback, text) {
+        log.info("project info ---> " + text);
+        var projList = getProjectFromText(text);
         log.debug(projList);
         var pj = [];
         for (var i = 0; i < projList.length; i++) {
@@ -166,44 +140,24 @@ module.exports = function(log) {
     };
 
 // Project Aux methods
-    var getProjectFromMsg = function getProjectFromMsg(msg) {
-        var tags = msg.text.toLowerCase().split(' ');
-        var origTagsAux = msg.text.split(' ');
-        var origTags = [];
-        var auxTags = [];
-        var customTag = "";
-        for (var d = 0; d < tags.length; d++) {
-            if (tags[d] !== "" && tags[d] !== "project" && tags[d] !== "proyecto" && tags[d].indexOf(botId.toLowerCase()) == -1) {
-                auxTags.push(tags[d]);
-                origTags.push(origTagsAux[d]);
-                if (customTag.length > 0) {customTag += " ";}
-                customTag += tags[d];
-            } else {
-                if (customTag.length > 0) {
-                    auxTags.push(customTag);
-                }
-                customTag = "";
-            }
-        }
-        if (customTag.length > 0) {
-            auxTags.push(customTag);
-        }
-        tags = auxTags;
+    var getProjectFromText = function getProjectFromText(text) {
+        var tags = text.toLowerCase().split(' ');
+
         log.debug(tags);
         var data = [];
         for (var d = 0; d < tags.length; d++) {
-            if (origTags[d] in sdhProjectsByID) {
-                data.push(origTags[d]);
-            } else if (origTags[d] in sdhProjectsByName){
-                data.push(sdhProjectsByName[origTags[d]].projectid);
+            if (tags[d] in sdhProjectsByID) {
+                data.push(tags[d]);
+            } else if (tags[d] in sdhProjectsByName){
+                data.push(sdhProjectsByName[tags[d]].projectid);
             }
         }
         return data;
     };
 
-    var repo = function repo(clientId, msg, callback) {
-        log.info("repo info ---> " + msg.text);
-        var repoList = getRepoFromMsg(msg);
+    var repo = function repo(callback, text) {
+        log.info("repo info ---> " + text);
+        var repoList = getRepoFromText(text);
         log.debug(repoList);
         var rp = [];
         for (var i = 0; i < repoList.length; i++) {
@@ -211,80 +165,39 @@ module.exports = function(log) {
         }
         var data = {
             'title': "Repository Information",
-            'description': "This is the core bot get rpository/ies information",
+            'description': "This is the core bot get repository/ies information",
             'data': rp
         }
         callback (data);
     };
 
 // Repos Aux methods
-    var getRepoFromMsg = function getRepoFromMsg(msg) {
-        var tags = msg.text.toLowerCase().split(' ');
-        var origTagsAux = msg.text.split(' ');
-        var origTags = [];
-        var auxTags = [];
-        var customTag = "";
-        for (var d = 0; d < tags.length; d++) {
-            if (tags[d] !== "" && tags[d] !== "repository" && tags[d] !== "repositorio" && tags[d] !== "repo" && tags[d].indexOf(botId.toLowerCase()) == -1) {
-                auxTags.push(tags[d]);
-                origTags.push(origTagsAux[d]);
-                if (customTag.length > 0) {customTag += " ";}
-                customTag += tags[d];
-            } else {
-                if (customTag.length > 0) {
-                    auxTags.push(customTag);
-                }
-                customTag = "";
-            }
-        }
-        if (customTag.length > 0) {
-            auxTags.push(customTag);
-        }
-        tags = auxTags;
+    var getRepoFromText = function getRepoFromText(text) {
+        var tags = text.toLowerCase().split(' ');
         log.debug(tags);
         var repo = [];
         for (var d = 0; d < tags.length; d++) {
-            if (origTags[d] in sdhReposByID) {
-                repo.push(origTags[d]);
-            } else if (origTags[d] in sdhReposByName){
-                repo.push(sdhReposByName[origTags[d]].repositoryid);
+            if (tags[d] in sdhReposByID) {
+                repo.push(tags[d]);
+            } else if (tags[d] in sdhReposByName){
+                repo.push(sdhReposByName[tags[d]].repositoryid);
             }
         }
         return repo;
     };
 
 // Members aux methods
-    var getUsersFromMsg = function getUsersFromMsg(msg) {
-        var tags = msg.text.toLowerCase().split(' ');
-        var origTagsAux = msg.text.split(' ');
-        var origTags = [];
-        var auxTags = [];
-        var customTag = "";
-        for (var d = 0; d < tags.length; d++) {
-            if (tags[d] !== "" && tags[d] !== "user" && tags[d] !== "miembro" && tags[d] !== "member" && tags[d] !== "usuario" && tags[d].indexOf(botId.toLowerCase()) == -1) {
-                auxTags.push(tags[d]);
-                origTags.push(origTagsAux[d]);
-                if (customTag.length > 0) {customTag += " ";}
-                customTag += tags[d];
-            } else {
-                if (customTag.length > 0) {
-                    auxTags.push(customTag);
-                }
-                customTag = "";
-            }
-        }
-        if (customTag.length > 0) {
-            auxTags.push(customTag);
-        }
-        tags = auxTags;
+    var getUsersFromText = function getUsersFromText(text) {
+        var tags = text.toLowerCase().split(' ');
+
         log.debug(tags);
         var userList = [];
         for (var d = 0; d < tags.length; d++) {
-            if (origTags[d] in clientUserInfo) {
-                userList.push(clientUserInfo[origTags[d]]);
+            if (tags[d] in clientUserInfo) {
+                userList.push(clientUserInfo[tags[d]]);
             } else {
                 for (var key in clientUserInfo) {
-                    if (key.indexOf("<@") > -1 && key.indexOf(">") > -1 && key.indexOf(origTags[d]) > -1) {
+                    if (key.indexOf("<@") > -1 && key.indexOf(">") > -1 && key.indexOf(tags[d]) > -1) {
                         userList.push(clientUserInfo[key]);
                     }
                 }
@@ -293,9 +206,9 @@ module.exports = function(log) {
         return userList;
     };
 
-    var member = function member(clientId, msg, callback) {
-        log.info("member info ---> " + msg.text);
-        var userList = getUsersFromMsg(msg);
+    var member = function member(callback, text) {
+        log.info("member info ---> " + text);
+        var userList = getUsersFromText(text);
         log.debug(userList);
         var us = [];
         for (var i = 0; i < userList.length; i++) {
@@ -308,25 +221,25 @@ module.exports = function(log) {
         }
         callback (data);
     };
-    var allMetrics = function allMetrics(clientId, msg, callback) {
+    var allMetrics = function allMetrics(callback) {
         internalSDHtools.getSDHMetrics(callback);
     };
-    var allViews = function allViews(clientId, msg, callback) {
+    var allViews = function allViews(callback) {
         internalSDHtools.getSDHViews(callback);
     };
-    var allOrgs = function allOrgs(clientId, msg, callback) {
+    var allOrgs = function allOrgs(callback) {
         internalSDHtools.getSDHOrganizations(callback);
     };
-    var allProducts = function allProducts(clientId, msg, callback) {
+    var allProducts = function allProducts(callback) {
         internalSDHtools.getSDHProducts(callback);
     };
-    var allProjects = function allProjects(clientId, msg, callback) {
+    var allProjects = function allProjects(callback) {
         internalSDHtools.getSDHProjects(callback);
     };
-    var allRepos = function allRepos(clientId, msg, callback) {
+    var allRepos = function allRepos(callback) {
         internalSDHtools.getSDHRepositories(callback);
     };
-    var allMembers = function allMembers(clientId, msg, callback) {
+    var allMembers = function allMembers(callback) {
         internalSDHtools.getSDHMembers(callback);
     };
     var sdhParser = function sdhParser(clientId, msg, callback) {
