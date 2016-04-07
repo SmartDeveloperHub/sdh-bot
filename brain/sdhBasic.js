@@ -22,14 +22,16 @@
 
 'use strict';
 
-module.exports = function(log) {
+var request = require('request');
+
+module.exports = function(sdhApiUrl, log) {
 
     var _exports = {};
 
     /* PRIVATE */
     var getValidAPIUri = function getValidAPIUri(path) {
-        var a = SDH_API_URL;
-        if (SDH_API_URL[SDH_API_URL.length-1] !== '/'){
+        var a = sdhApiUrl;
+        if (sdhApiUrl[sdhApiUrl.length-1] !== '/'){
             a += '/';
         }
         return a + path;

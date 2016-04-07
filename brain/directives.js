@@ -35,7 +35,7 @@ module.exports = function(log) {
     };
 
 
-    _exports. registerDirective =function(pattern, operation, mappings) {
+    _exports.registerDirective =function(pattern, operation, mappings) {
 
         try {
             var regex = (pattern instanceof RegExp ? pattern : new RegExp(pattern));

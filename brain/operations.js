@@ -22,7 +22,7 @@
 
 'use strict';
 
-module.exports = function(log) {
+module.exports = function(core, log) {
 
     //TODO: adapt all methods to receive parameters instead of a msg and then try to obtain the parameters from it
 
@@ -53,7 +53,7 @@ module.exports = function(log) {
         log.info("metric about query ---> " + text);
         var tags = text.toLowerCase().split(' ');
         var parsedElements = [];
-        internalSDHtools.getSDHMetrics(function(err, allmet) {
+        core.data.getSDHMetrics(function(err, allmet) {
             for (var i = 0; i < allmet.length; i++) {
 
                 var metric = allmet[i];
@@ -232,25 +232,25 @@ module.exports = function(log) {
     }
 
     var allMetrics = function allMetrics(callback) {
-        internalSDHtools.getSDHMetrics(callback);
+        core.data.getSDHMetrics(callback);
     };
     var allViews = function allViews(callback) {
-        internalSDHtools.getSDHViews(callback);
+        core.data.getSDHViews(callback);
     };
     var allOrgs = function allOrgs(callback) {
-        internalSDHtools.getSDHOrganizations(callback);
+        core.data.getSDHOrganizations(callback);
     };
     var allProducts = function allProducts(callback) {
-        internalSDHtools.getSDHProducts(callback);
+        core.data.getSDHProducts(callback);
     };
     var allProjects = function allProjects(callback) {
-        internalSDHtools.getSDHProjects(callback);
+        core.data.getSDHProjects(callback);
     };
     var allRepos = function allRepos(callback) {
-        internalSDHtools.getSDHRepositories(callback);
+        core.data.getSDHRepositories(callback);
     };
     var allMembers = function allMembers(callback) {
-        internalSDHtools.getSDHMembers(callback);
+        core.data.getSDHMembers(callback);
     };
     var sdhParser = function sdhParser(clientId, msg, callback) {
 
