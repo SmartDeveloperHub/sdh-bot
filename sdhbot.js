@@ -21,7 +21,12 @@
 */
 'use strict';
 
-var Promise = require("promise");
+var Promise = require("bluebird");
+
+// Do not silently capture errors
+Promise.onPossiblyUnhandledRejection(function(error){
+    throw error;
+});
 
 module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
 
@@ -93,7 +98,7 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
             core[meth] = directives[meth];
         }
 
-        return Promise.denodeify(preloadEntityIds)();
+        return Promise.promisify(preloadEntityIds)();
 
     };
 
@@ -107,7 +112,7 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
     };
 
     var preloadEntityIds = function preloadEntityIds(cb) {
-        log.info("entra");
+
         var rcounter = 0;
         var endLoad = function endLoad() {
 
