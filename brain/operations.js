@@ -47,13 +47,13 @@ module.exports = function(log) {
     };
     var metric = function metric(callback, text) {
         // TODO extract metric id, subjects and range information from msg to generate metric options
-        callback ("metric data");
+        callback (null, "metric data");
     };
     var getMetricsAbout = function getMetricsAbout(callback, text) {
         log.info("metric about query ---> " + text);
         var tags = text.toLowerCase().split(' ');
         var parsedElements = [];
-        internalSDHtools.getSDHMetrics(function(allmet) {
+        internalSDHtools.getSDHMetrics(function(err, allmet) {
             for (var i = 0; i < allmet.length; i++) {
 
                 var metric = allmet[i];
@@ -82,13 +82,13 @@ module.exports = function(log) {
                 }
 
             };
-            callback(parsedElements);
+            callback(null, parsedElements);
         });
     };
 
     var view = function view(callback, text) {
         // TODO extract metric id, subjects and range information from msg to generate view options
-        callback ("view data");
+        callback (null, "view data");
     };
 
     var product = function product(callback, text) {
@@ -104,7 +104,7 @@ module.exports = function(log) {
             'description': "This is the core bot get product/s information",
             'data': pj
         }
-        callback (data);
+        callback (null, data);
     };
 
 // Product Aux methods
@@ -136,7 +136,7 @@ module.exports = function(log) {
             'description': "This is the core bot get project/s information",
             'data': pj
         }
-        callback (data);
+        callback (null, data);
     };
 
 // Project Aux methods
@@ -168,7 +168,7 @@ module.exports = function(log) {
             'description': "This is the core bot get repository/ies information",
             'data': rp
         }
-        callback (data);
+        callback (null, data);
     };
 
 // Repos Aux methods
@@ -187,40 +187,50 @@ module.exports = function(log) {
     };
 
 // Members aux methods
-    var getUsersFromText = function getUsersFromText(text) {
-        var tags = text.toLowerCase().split(' ');
 
-        log.debug(tags);
-        var userList = [];
-        for (var d = 0; d < tags.length; d++) {
-            if (tags[d] in clientUserInfo) {
-                userList.push(clientUserInfo[tags[d]]);
-            } else {
-                for (var key in clientUserInfo) {
-                    if (key.indexOf("<@") > -1 && key.indexOf(">") > -1 && key.indexOf(tags[d]) > -1) {
-                        userList.push(clientUserInfo[key]);
+    var member = function member(callback, text) {
+        log.info("member info ---> " + text);
+        var user = getUserFromText(text);
+        log.debug(user);
+        if(user) {
+            var data = {
+                'title': "User Information",
+                'description': "This is the core bot get member/s information",
+                'data': user
+            }
+            callback (null, data);
+        } else {
+            callback(null, "Could not find that member");
+        }
+
+    };
+
+    var getUserFromText = function(text) {
+        text = text.trim();
+        var sdhId;
+        if(text.substr(0, 6) === "sdhid:") {
+            sdhId = text.substring(6);
+            return sdhUsersByID[sdhId];
+        } else { // Find in the index
+            for (sdhId in sdhUsersByID) {
+
+                var user = sdhUsersByID[sdhId];
+
+                if(user.name.toLowerCase().indexOf(text.toLowerCase()) !== -1 || user.nick === text) { //Find by partial name or exact nick
+                    return user;
+                } else {
+                    for(var e = 0; e < user.email.length; e++) { //Find by exact email
+                        if(user.email[e] === text) {
+                            return user;
+                        }
                     }
                 }
             }
         }
-        return userList;
-    };
 
-    var member = function member(callback, text) {
-        log.info("member info ---> " + text);
-        var userList = getUsersFromText(text);
-        log.debug(userList);
-        var us = [];
-        for (var i = 0; i < userList.length; i++) {
-            us.push(sdhUsersByID[userList[i]]);
-        }
-        var data = {
-            'title': "User Information",
-            'description': "This is the core bot get member/s information",
-            'data': us
-        }
-        callback (data);
-    };
+        return null;
+    }
+
     var allMetrics = function allMetrics(callback) {
         internalSDHtools.getSDHMetrics(callback);
     };

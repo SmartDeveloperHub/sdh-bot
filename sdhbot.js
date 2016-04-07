@@ -119,14 +119,14 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
             }
         };
         //Members
-        internalSDHtools.getSDHMembers(function (members) {
+        internalSDHtools.getSDHMembers(function (err, members) {
             for (var i = 0; i < members.length; i++) {
                 sdhUsersByID[members[i].userid] = members[i];
             }
             endLoad()
         });
         //Repositories
-        internalSDHtools.getSDHRepositories(function (rep) {
+        internalSDHtools.getSDHRepositories(function (err, rep) {
             for (var i = 0; i < rep.length; i++) {
                 sdhReposByID[rep[i].repositoryid] = rep[i];
                 sdhReposByName[rep[i].name] = rep[i];
@@ -134,21 +134,21 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
             endLoad()
         });
         //Products
-        internalSDHtools.getSDHProducts(function (prod) {
+        internalSDHtools.getSDHProducts(function (err, prod) {
             for (var i = 0; i < prod.length; i++) {
                 sdhProductsByID[prod[i].productid] = prod[i];
             }
             endLoad()
         });
         //Projects
-        internalSDHtools.getSDHProjects(function (proj) {
+        internalSDHtools.getSDHProjects(function (err, proj) {
             for (var i = 0; i < proj.length; i++) {
                 sdhProjectsByID[proj[i].projectid] = proj[i];
             }
             endLoad()
         });
         //Organizations
-        internalSDHtools.getSDHOrganizations(function (org) {
+        internalSDHtools.getSDHOrganizations(function (err, org) {
             for (var i = 0; i < org.length; i++) {
                 // By the moment there are no organizationid in the unique Organization info in SDH
                 //sdhOrganizationsByID[org[i].organizationid] = org[i];
@@ -201,7 +201,7 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
         ];
         var getEntities = [
             //Members
-            internalSDHtools.getSDHMembers(function (members) {
+            internalSDHtools.getSDHMembers(function (err, members) {
                 members.map(function (dat) {
                     sdhUsersByID_[dat.userid] = dat;
                     return elastic.addDocument(dat, indexName);
@@ -213,26 +213,26 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
                 return members.all(members);
             }),
             //Repositories
-            internalSDHtools.getSDHRepositories(function (rep) {
+            internalSDHtools.getSDHRepositories(function (err, rep) {
                 for (var i = 0; i < rep.length; i++) {
                     sdhReposByID[rep[i].repositoryid] = rep[i];
                     sdhReposByName[rep[i].name] = rep[i];
                 }
             }),
             //Products
-            internalSDHtools.getSDHProducts(function (prod) {
+            internalSDHtools.getSDHProducts(function (err, prod) {
                 for (var i = 0; i < prod.length; i++) {
                     sdhProductsByID[prod[i].productid] = prod[i];
                 }
             }),
             //Projects
-            internalSDHtools.getSDHProjects(function (proj) {
+            internalSDHtools.getSDHProjects(function (err, proj) {
                 for (var i = 0; i < proj.length; i++) {
                     sdhProjectsByID[proj[i].projectid] = proj[i];
                 }
             }),
             //Organizations
-            internalSDHtools.getSDHOrganizations(function (org) {
+            internalSDHtools.getSDHOrganizations(function (err, org) {
                 for (var i = 0; i < org.length; i++) {
                     // By the moment there are no organizationid in the unique Organization info in SDH
                     //sdhOrganizationsByID[org[i].organizationid] = org[i];

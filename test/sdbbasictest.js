@@ -44,7 +44,7 @@ var startTest = function startTest() {
     log.info("** starting sdh Basic Tools async-test **");
 
     log.debug("1. Test getSDHMembers:");
-    internalSDHtools.getSDHMembers(function(members) {
+    internalSDHtools.getSDHMembers(function(err, members) {
         testCounter++;
         log.debug("1->" + JSON.stringify(members));
         if (!members || !Array.isArray(members)) {
@@ -59,7 +59,7 @@ var startTest = function startTest() {
     });
 
     log.debug("2. Test getSDHMetrics:");
-    internalSDHtools.getSDHMetrics(function(metrics) {
+    internalSDHtools.getSDHMetrics(function(err, metrics) {
         testCounter++;
         log.debug("2->" + JSON.stringify(metrics));
         if (!metrics || !Array.isArray(metrics)) {
@@ -74,7 +74,7 @@ var startTest = function startTest() {
     });
 
     log.debug("3. Test getSDHMetric:");
-    internalSDHtools.getSDHMetric("developers", {}, function(metric) {
+    internalSDHtools.getSDHMetric("developers", {}, function(err, metric) {
         testCounter++;
         log.debug("3->" + JSON.stringify(metric));
         if (!metric || !metric.values || !Array.isArray(metric.values) || !metric.interval) {
@@ -89,7 +89,7 @@ var startTest = function startTest() {
     });
 
     log.debug("4. Test getSDHProducts:");
-    internalSDHtools.getSDHProducts(function(products) {
+    internalSDHtools.getSDHProducts(function(err, products) {
         testCounter++;
         log.debug("4->" + JSON.stringify(products));
         if (!products || !Array.isArray(products)) {
@@ -104,7 +104,7 @@ var startTest = function startTest() {
     });
 
     log.debug("5. Test getSDHProduct:");
-    internalSDHtools.getSDHProduct("product-sdh-web", {}, function(product) {
+    internalSDHtools.getSDHProduct("product-sdh-web", {}, function(err, product) {
         testCounter++;
         log.debug("5->" + JSON.stringify(product));
         if (!product || !product.productid || product.productid !== "product-sdh-web") {
@@ -119,7 +119,7 @@ var startTest = function startTest() {
     });
 
     log.debug("6. Test getSDHProjects:");
-    internalSDHtools.getSDHProjects(function(projects) {
+    internalSDHtools.getSDHProjects(function(err, projects) {
         testCounter++;
         log.debug("6->" + JSON.stringify(projects));
         if (!projects || !Array.isArray(projects)) {
@@ -131,7 +131,7 @@ var startTest = function startTest() {
     });
 
     log.debug("7. Test getSDHProject:");
-    internalSDHtools.getSDHProject("project-sdh-web", {}, function(project) {
+    internalSDHtools.getSDHProject("project-sdh-web", {}, function(err, project) {
         testCounter++;
         log.debug("7->" + JSON.stringify(project));
         if (!project || !project.projectid || project.projectid !== "project-sdh-web") {
@@ -146,7 +146,7 @@ var startTest = function startTest() {
     });
 
     log.debug("8. Test getSDHRepositories:");
-    internalSDHtools.getSDHRepositories(function(repositories) {
+    internalSDHtools.getSDHRepositories(function(err, repositories) {
         testCounter++;
         log.debug("8->" + JSON.stringify(repositories));
         if (!repositories || !Array.isArray(repositories)) {
@@ -158,7 +158,7 @@ var startTest = function startTest() {
     });
 
     log.debug("9. Test getSDHRepository:");
-    internalSDHtools.getSDHRepository(43, {}, function(repository) {
+    internalSDHtools.getSDHRepository(43, {}, function(err, repository) {
         testCounter++;
         log.debug("9->" + JSON.stringify(repository));
         if (!repository || !repository.repositoryid || repository.repositoryid !== "43") {
@@ -173,7 +173,7 @@ var startTest = function startTest() {
     });
 
     log.debug("10. Test getSDHOrganizations:");
-    internalSDHtools.getSDHOrganizations(function(org) {
+    internalSDHtools.getSDHOrganizations(function(err, org) {
         testCounter++;
         log.debug("10->" + JSON.stringify(org));
         if (!org || !Array.isArray(org)) {
@@ -198,7 +198,7 @@ var startTest = function startTest() {
     });*/
 
     log.debug("11. Test getSDHViews:");
-    internalSDHtools.getSDHViews(function(views) {
+    internalSDHtools.getSDHViews(function(err, views) {
         testCounter++;
         log.debug("11->" + JSON.stringify(views));
         if (!views || !Array.isArray(views)) {
@@ -213,7 +213,7 @@ var startTest = function startTest() {
     });
 
     log.debug("12. Test getSDHView:");
-    internalSDHtools.getSDHView("view-director-products", {'uid':1004}, function(view) {
+    internalSDHtools.getSDHView("view-director-products", {'uid':1004}, function(err, view) {
         testCounter++;
         log.debug("12->" + JSON.stringify(view));
         if (!view || !view.values || !Array.isArray(view.values) || !view.interval) {
