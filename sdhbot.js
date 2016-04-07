@@ -74,7 +74,9 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
             core[meth] = directives[meth];
         }
 
-        return Promise.promisify(preloadEntityIds)();
+        return preloadEntityIds().then(function() {
+            return core;
+        });
 
     };
 
@@ -89,54 +91,47 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
 
     var preloadEntityIds = function preloadEntityIds(cb) {
 
-        var rcounter = 0;
-        var endLoad = function endLoad() {
+        // COnvert methods to promises
+        var sdhData = Promise.promisifyAll(core.data);
 
-            rcounter++;
-            if (rcounter == 5) {
-                cb(null, core);
-            } else if(rcounter > 5) {
-                log.debug('Concurr error sdhbot.preloadEntityIds');
-            }
-        };
-        //Members
-        core.data.getSDHMembers(function (err, members) {
-            for (var i = 0; i < members.length; i++) {
-                sdhUsersByID[members[i].userid] = members[i];
-            }
-            endLoad()
-        });
-        //Repositories
-        core.data.getSDHRepositories(function (err, rep) {
-            for (var i = 0; i < rep.length; i++) {
-                sdhReposByID[rep[i].repositoryid] = rep[i];
-                sdhReposByName[rep[i].name] = rep[i];
-            }
-            endLoad()
-        });
-        //Products
-        core.data.getSDHProducts(function (err, prod) {
-            for (var i = 0; i < prod.length; i++) {
-                sdhProductsByID[prod[i].productid] = prod[i];
-            }
-            endLoad()
-        });
-        //Projects
-        core.data.getSDHProjects(function (err, proj) {
-            for (var i = 0; i < proj.length; i++) {
-                sdhProjectsByID[proj[i].projectid] = proj[i];
-            }
-            endLoad()
-        });
-        //Organizations
-        core.data.getSDHOrganizations(function (err, org) {
-            for (var i = 0; i < org.length; i++) {
-                // By the moment there are no organizationid in the unique Organization info in SDH
-                //sdhOrganizationsByID[org[i].organizationid] = org[i];
-                sdhOrganizationsByID[org[i].title] = org[i];
-            }
-            endLoad()
-        });
+        var loadPromises = [
+            //Members
+            sdhData.getSDHMembersAsync().then(function (members) {
+                for (var i = 0; i < members.length; i++) {
+                    sdhUsersByID[members[i].userid] = members[i];
+                }
+            }),
+            //Repositories
+            sdhData.getSDHRepositoriesAsync().then(function (rep) {
+                for (var i = 0; i < rep.length; i++) {
+                    sdhReposByID[rep[i].repositoryid] = rep[i];
+                    sdhReposByName[rep[i].name] = rep[i];
+                }
+            }),
+            //Products
+            sdhData.getSDHProductsAsync().then(function (prod) {
+                for (var i = 0; i < prod.length; i++) {
+                    sdhProductsByID[prod[i].productid] = prod[i];
+                }
+            }),
+            //Projects
+            sdhData.getSDHProjectsAsync().then(function (proj) {
+                for (var i = 0; i < proj.length; i++) {
+                    sdhProjectsByID[proj[i].projectid] = proj[i];
+                }
+            }),
+            //Organizations
+            sdhData.getSDHOrganizationsAsync().then(function (org) {
+                for (var i = 0; i < org.length; i++) {
+                    // By the moment there are no organizationid in the unique Organization info in SDH
+                    //sdhOrganizationsByID[org[i].organizationid] = org[i];
+                    sdhOrganizationsByID[org[i].title] = org[i];
+                }
+            })
+        ];
+
+        return Promise.all(loadPromises);
+
     };
 
     var startESindex = function startESindex() {
