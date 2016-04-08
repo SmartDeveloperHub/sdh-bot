@@ -75,6 +75,8 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
         }
 
         return preloadEntityIds().then(function() {
+            //TODO: remove next line, just for testign
+            require("./brain/elasticSearch")(core, log);
             return core;
         });
 
