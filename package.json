@@ -25,6 +25,10 @@
     "moment": "^2.10.3",
     "slack-node": "*",
     "bunyan": "*",
-    "bunyan-prettystream": "*"
+    "bunyan-prettystream": "*",
+    "request": "*",
+    "google-images": "*",
+    "valid-url": "*",
+    "node-telegram-bot-api": "*"
   }
 }

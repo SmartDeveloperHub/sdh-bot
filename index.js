@@ -52,6 +52,8 @@
             console.error("Error creating log file " +  FILE_LOG_PATH);
             log.error(err);
         } else {
+            GLOBAL.moment = require("moment");
+            GLOBAL.request = require('request');
             log = bunyan.createLogger({
                     name: 'SDH-BOT',
                     streams: [{
@@ -66,7 +68,8 @@
                         count: FILE_LOG_NFILES        // keep 3 back copies
                     }]
             });
-            startBOT();
+            var oldBots = require('./botinterfaces.js');
+            //startBOT();
         }
     });
 
