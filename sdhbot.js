@@ -28,7 +28,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
     throw error;
 });
 
-module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
+module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, log) {
 
     var core = {};
 
@@ -37,12 +37,17 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
         var validUrl = require('valid-url');
 
         if (!validUrl.isUri(sdhApiUrl)){
-            log.error("Not valid SDH_API_URL: " + sdhApiUrl);
+            log.error("Not valid SDH API url: " + sdhApiUrl);
             process.exit(0);
         }
 
         if (!validUrl.isUri(sdhDashboardUrl)){
-            log.error("Not valid SDH_DASHBOARD_URL: " + sdhDashboardUrl);
+            log.error("Not valid SDH Dashboard urlL: " + sdhDashboardUrl);
+            process.exit(0);
+        }
+
+        if (!validUrl.isUri(searchUrl)){
+            log.error("Not valid Search Url: " + searchUrl);
             process.exit(0);
         }
 
@@ -75,8 +80,11 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
         }
 
         return preloadEntityIds().then(function() {
-            //TODO: remove next line, just for testign
-            require("./brain/elasticSearch")(core, log);
+            core.search = require("./brain/elasticSearch")(searchUrl, core, log);
+
+            return core.search.fillWithData();
+        }).then(function() {
+            log.info("... SDH BOT CORE is ready ...");
             return core;
         });
 
@@ -134,98 +142,6 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, log) {
 
         return Promise.all(loadPromises);
 
-    };
-
-    var startESindex = function startESindex() {
-        //TODO
-        var sdhUsersByID_ = {};
-        var cleanIndex = [
-            elastic.indexExists("users").then(function (exists) {
-                if (exists) {
-                    return elastic.deleteIndex("users");
-                }
-            }).then(function () {
-                return elastic.initIndex("users").then(function() {
-                    return elastic.initMapping("users");
-                })
-            }),
-            elastic.indexExists("products").then(function (exists) {
-                if (exists) {
-                    return elastic.deleteIndex("products");
-                }
-            }).then(function () {
-                return elastic.initIndex("products").then(function() {
-                    return elastic.initMapping("products");
-                })
-            }),
-            elastic.indexExists("projects").then(function (exists) {
-                if (exists) {
-                    return elastic.deleteIndex("projects");
-                }
-            }).then(function () {
-                return elastic.initIndex("projects").then(function() {
-                    return elastic.initMapping("projects");
-                })
-            }),
-            elastic.indexExists("repositories").then(function (exists) {
-                if (exists) {
-                    return elastic.deleteIndex("repositories");
-                }
-            }).then(function () {
-                return elastic.initIndex("repositories").then(function () {
-                    return elastic.initMapping("repositories");
-                })
-            })
-        ];
-        var getEntities = [
-            //Members
-            core.data.getSDHMembers(function (err, members) {
-                members.map(function (dat) {
-                    sdhUsersByID_[dat.userid] = dat;
-                    return elastic.addDocument(dat, indexName);
-                });
-                for (var i = 0; i < members.length; i++) {
-                    sdhUsersByID[members[i].userid] = members[i];
-                }
-                log.info(sdhUsersByID)
-                return members.all(members);
-            }),
-            //Repositories
-            core.data.getSDHRepositories(function (err, rep) {
-                for (var i = 0; i < rep.length; i++) {
-                    sdhReposByID[rep[i].repositoryid] = rep[i];
-                    sdhReposByName[rep[i].name] = rep[i];
-                }
-            }),
-            //Products
-            core.data.getSDHProducts(function (err, prod) {
-                for (var i = 0; i < prod.length; i++) {
-                    sdhProductsByID[prod[i].productid] = prod[i];
-                }
-            }),
-            //Projects
-            core.data.getSDHProjects(function (err, proj) {
-                for (var i = 0; i < proj.length; i++) {
-                    sdhProjectsByID[proj[i].projectid] = proj[i];
-                }
-            }),
-            //Organizations
-            core.data.getSDHOrganizations(function (err, org) {
-                for (var i = 0; i < org.length; i++) {
-                    // By the moment there are no organizationid in the unique Organization info in SDH
-                    //sdhOrganizationsByID[org[i].organizationid] = org[i];
-                    sdhOrganizationsByID[org[i].title] = org[i];
-                }
-            })
-        ];
-
-        Promise.all(cleanIndex).all(getEntities).then(function () {
-                log.info("elasticTools enable");
-            }
-        ).catch(function(err) {
-                log.info("error loading data into Elastic Search");
-                log.error(err);
-            });
     };
 
     return init();

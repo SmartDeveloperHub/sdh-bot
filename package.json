@@ -20,15 +20,16 @@
   ],
   "main": "sdhbot.js",
   "dependencies": {
-    "mkdirp": "*",
-    "moment": "*",
+    "bluebird": "^3.3.4",
+    "botkit": "*",
     "bunyan": "*",
     "bunyan-prettystream": "*",
-    "request": "*",
+    "elasticsearch": "^11.0.0",
     "google-images": "*",
-    "valid-url": "*",
-    "botkit": "*",
+    "mkdirp": "*",
+    "moment": "*",
     "node-telegram-bot-api": "*",
-    "bluebird": "^3.3.4"
+    "request": "*",
+    "valid-url": "*"
   }
 }

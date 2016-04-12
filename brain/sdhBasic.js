@@ -37,6 +37,19 @@ module.exports = function(sdhApiUrl, log) {
         return a + path;
     };
 
+    var requestApiUri = function requestApiUri(uri, callback) {
+        log.debug(uri);
+        request(uri, function(err, resp, body) {
+            if (err || resp.statusCode !== 200) {
+                log.error(err);
+                callback(err);
+            } else {
+                var parsedBody = JSON.parse(body);
+                callback(err, parsedBody);
+            }
+        });
+    };
+
     /* PUBLIC */
     _exports.getSDHMembers = function getSDHMembers(callback) {
         var uri = getValidAPIUri('users');
@@ -66,7 +79,11 @@ module.exports = function(sdhApiUrl, log) {
         });
     };
 
-    _exports.getSDHMetric = function getSDHMetric(mid, options, callback) {
+    _exports.getSDHMetricInfo = function getSDHMetricInfo(mid, callback) {
+        requestApiUri(getValidAPIUri('metricinfo/' + mid), callback);
+    };
+
+    _exports.getSDHMetric = function getSDHMetric(mid, callback) {
         var qp;
         // TODO query params
         var uri = getValidAPIUri('metrics/' + mid);

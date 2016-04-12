@@ -22,6 +22,13 @@
 
 'use strict';
 
+var Promise = require("bluebird");
+
+// Do not silently capture errors
+Promise.onPossiblyUnhandledRejection(function(error){
+    throw error;
+});
+
 module.exports = function(core, log) {
 
     //TODO: adapt all methods to receive parameters instead of a msg and then try to obtain the parameters from it
@@ -50,39 +57,15 @@ module.exports = function(core, log) {
         callback (null, "metric data");
     };
     var getMetricsAbout = function getMetricsAbout(callback, text) {
-        log.info("metric about query ---> " + text);
-        var tags = text.toLowerCase().split(' ');
-        var parsedElements = [];
-        core.data.getSDHMetrics(function(err, allmet) {
-            for (var i = 0; i < allmet.length; i++) {
 
-                var metric = allmet[i];
-                if(!metric.title) {
-                    log.warn("No title in metric: " + JSON.stringify(metric));
-                    metric.title = "";
-                }
-                var refAtt = metric.title.toLowerCase(); // Views have not titles
-                if (tags.length == 0) {
-                    // All
-                    parsedElements.push(refAtt);
-                } else {
-                    // Tag filter
-                    var match = false;
-                    for (var j = 0; j < tags.length; j++) {
-                        if (refAtt.indexOf(tags[j]) == -1) {
-                            match = false;
-                            break;
-                        } else {
-                            match = true;
-                        }
-                    }
-                    if (match) {
-                        parsedElements.push(metric);
-                    }
-                }
+        var getSDHMetricInfo = Promise.promisify(core.data.getSDHMetricInfo);
 
-            };
-            callback(null, parsedElements);
+        core.search.metrics(text).then(function(results) {
+            var metrics = results.map(function(entry) {
+                var id = entry._source.metric_id;
+                return getSDHMetricInfo(id); //TODO: reflect?
+            });
+            return Promise.all(metrics).asCallback(callback);
         });
     };
 
