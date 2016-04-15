@@ -37,7 +37,7 @@ module.exports = function(sdhApiUrl, log) {
         return a + path;
     };
 
-    var requestApiUri = function requestApiUri(uri, callback) {
+    var requestApiUri = function requestApiUri(uri, callback) { //TODO: optimize the others using this method
         log.debug(uri);
         request(uri, function(err, resp, body) {
             if (err || resp.statusCode !== 200) {
@@ -52,31 +52,11 @@ module.exports = function(sdhApiUrl, log) {
 
     /* PUBLIC */
     _exports.getSDHMembers = function getSDHMembers(callback) {
-        var uri = getValidAPIUri('users');
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            var parsedBody = JSON.parse(body);
-            if (err) {
-                log.error(err);
-                callback(err);
-            } else {
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('users'), callback);
     };
 
     _exports.getSDHMetrics = function getSDHMetrics(callback) {
-        var uri = getValidAPIUri('metrics');
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            var parsedBody = JSON.parse(body);
-            if (err) {
-                log.error(err);
-                callback(err);
-            } else {
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('metrics'), callback);
     };
 
     _exports.getSDHMetricInfo = function getSDHMetricInfo(mid, callback) {
@@ -86,160 +66,50 @@ module.exports = function(sdhApiUrl, log) {
     _exports.getSDHMetric = function getSDHMetric(mid, callback) {
         var qp;
         // TODO query params
-        var uri = getValidAPIUri('metrics/' + mid);
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('metrics/' + mid), callback);
     };
 
     _exports.getSDHViews = function getSDHViews(callback) {
-        var uri = getValidAPIUri('tbdata/');
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('tbdata/'), callback);
     };
 
     _exports.getSDHView = function getSDHView(vid, options, callback) {
         var qp;
         // TODO query params.. only for test by the moment testing /tbdata/view-director-products?uid=1004
-        var uri = getValidAPIUri('tbdata/' + vid + '?uid=' + options.uid);
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('tbdata/' + vid + '?uid=' + options.uid), callback);
     };
 
     _exports.getSDHProducts = function getSDHProducts (callback) {
-        var uri = getValidAPIUri('products');
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('products'), callback);
     };
 
     _exports.getSDHProduct = function getSDHProduct (prid, options, callback) {
-        var uri = getValidAPIUri('products/' + prid);
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('products/' + prid), callback);
     };
 
     _exports.getSDHProjects = function getSDHProjects (callback) {
-        var uri = getValidAPIUri('projects');
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('projects'), callback);
     };
 
     _exports.getSDHProject = function getSDHProject (pjid, options, callback) {
-        var uri = getValidAPIUri('projects/' + pjid);
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('projects/' + pjid), callback);
     };
 
     _exports.getSDHRepositories = function getSDHRepositories (callback) {
-        var uri = getValidAPIUri('repositories');
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('repositories'), callback);
     };
 
     _exports.getSDHRepository = function getSDHRepository (rid, options, callback) {
-        var uri = getValidAPIUri('repositories/' + rid);
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('repositories/' + rid), callback);
     };
 
     _exports.getSDHOrganizations = function getSDHOrganizations (callback) {
-        var uri = getValidAPIUri('organization');
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('organization'), callback);
     };
 
     // This metod is not avalable in SDH API by the moment
     _exports.getSDHOrganization = function getSDHOrganization (oid, options, callback) {
-        var uri = getValidAPIUri('organizations/' + oid);
-        log.debug(uri);
-        request(uri, function(err, resp, body) {
-            if (err || resp.statusCode !== 200) {
-                log.error(err);
-                callback(err);
-            } else {
-                var parsedBody = JSON.parse(body);
-                callback(err, parsedBody);
-            }
-        });
+        requestApiUri(getValidAPIUri('organizations/' + oid), callback);
     };
 
     return _exports;
