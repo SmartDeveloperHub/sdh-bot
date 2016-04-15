@@ -52,9 +52,57 @@ module.exports = function(core, log) {
             'data': data
         });
     };
-    var metric = function metric(callback, text) {
+    
+    var metric = function metric(callback, mid, options) {
         // TODO extract metric id, subjects and range information from msg to generate metric options
-        callback (null, "metric data");
+
+        var getSDHMetricInfo = Promise.promisify(core.data.getSDHMetricInfo);
+        var getSDHMetric = Promise.promisify(core.data.getSDHMetric);
+
+        var params = {};
+
+        getSDHMetricInfo(mid).then(function(metricInfo) {
+
+            if(options.param) {
+
+                if(metricInfo.params.length === 0 || metricInfo.params[0] == null) {
+                    throw new Error("Metric not found. The given metric does not require parameters.")
+                }
+
+                if(options.param.substr(0, 6) === "sdhid:") {
+                    if(metricInfo.params.indexOf("uid") === -1) {
+                        throw new Error("Metric not found. The given metric does not require uid parameter.")
+                    }
+                    params['uid'] = options.param.substring(6);
+
+                } else {
+
+                    var expectedParamType = metricInfo.params[0];
+                    var searchMethod;
+                    switch (expectedParamType) {
+                        case 'uid': searchMethod = core.search.users; break;
+                        case 'prid': searchMethod = core.search.products; break;
+                        case 'pid': searchMethod = core.search.projects; break;
+                        case 'rid': searchMethod = core.search.repositories; break;
+                    }
+
+                    return searchMethod(options.param).then(function(results) {
+                        if(results && results.length > 0) {
+                            var type = results[0]._type;
+                            params[expectedParamType] = results[0]._source[type+"_id"];
+                        }
+                    })
+
+                }
+
+            }
+
+        }).then(function() {
+            getSDHMetric(mid, params).asCallback(callback);
+        }).catch(function(e) {
+            throw e;
+        })
+
     };
     var getMetricsAbout = function getMetricsAbout(callback, text) {
 

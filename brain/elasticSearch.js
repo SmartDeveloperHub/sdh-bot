@@ -234,7 +234,7 @@ module.exports = function(elasticSearchUrl, core, log) {
                 addAllObjects(sdhReposByID, "entities", "repo", ["repositoryid", "name"], {trans:{repositoryid:{name:"id"}}}),
 
                 // Users
-                addAllObjects(sdhReposByID, "entities", "user", ["userid", "name", "nick", "email"], {trans:{userid:{name:"id"}}})
+                addAllObjects(sdhUsersByID, "entities", "user", ["userid", "name", "nick", "email"], {trans:{userid:{name:"id"}}})
 
             ];
 
@@ -264,6 +264,10 @@ module.exports = function(elasticSearchUrl, core, log) {
 
     _exports.users = function(text, options) {
         return makeMultiMatchQuery("entities", ["user_id^3", "user_email^3", "user_nick^2", "user_name"], text, options);
+    }
+
+    _exports.general = function(text, options) {
+        return makeMultiMatchQuery("entities", ["org_*", "product_*", "project_*", "repo_*", "user_*"], text, options);
     }
 
     return _exports;

@@ -63,10 +63,14 @@ module.exports = function(sdhApiUrl, log) {
         requestApiUri(getValidAPIUri('metricinfo/' + mid), callback);
     };
 
-    _exports.getSDHMetric = function getSDHMetric(mid, callback) {
-        var qp;
-        // TODO query params
-        requestApiUri(getValidAPIUri('metrics/' + mid), callback);
+    _exports.getSDHMetric = function getSDHMetric(mid, params, callback) {
+        var qp = [];
+        for (var param in params) {
+            qp.push(param+"="+encodeURIComponent(params[param]));
+        }
+        var qpStr = (qp.length ? "?" + qp.join('&'): '');
+
+        requestApiUri(getValidAPIUri('metrics/' + mid + qpStr), callback);
     };
 
     _exports.getSDHViews = function getSDHViews(callback) {
