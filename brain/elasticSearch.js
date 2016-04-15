@@ -250,6 +250,22 @@ module.exports = function(elasticSearchUrl, core, log) {
         return makeMultiMatchQuery("entities", ["metric_id^3", "metric_title^2", "metric_description"], text, options);
     }
 
+    _exports.products = function(text, options) {
+        return makeMultiMatchQuery("entities", ["product_id^2", "product_name"], text, options);
+    }
+
+    _exports.projects = function(text, options) {
+        return makeMultiMatchQuery("entities", ["project_id^2", "project_name"], text, options);
+    }
+
+    _exports.repositories = function(text, options) {
+        return makeMultiMatchQuery("entities", ["repo_id^2", "repo_name"], text, options);
+    }
+
+    _exports.users = function(text, options) {
+        return makeMultiMatchQuery("entities", ["user_id^3", "user_email^3", "user_nick^2", "user_name"], text, options);
+    }
+
     return _exports;
 
 };

@@ -65,7 +65,7 @@ module.exports = function(core, log) {
                 var id = entry._source.metric_id;
                 return getSDHMetricInfo(id); //TODO: reflect?
             });
-            return Promise.all(metrics).asCallback(callback);
+            Promise.all(metrics).asCallback(callback);
         });
     };
 
@@ -75,144 +75,82 @@ module.exports = function(core, log) {
     };
 
     var product = function product(callback, text) {
-        log.info("product info ---> " + text);
-        var prodList = getProductFromText(text);
-        log.debug(prodList);
-        var pj = [];
-        for (var i = 0; i < prodList.length; i++) {
-            pj.push(sdhProductsByID[prodList[i]]);
-        }
-        var data = {
-            'title': "Product Information",
-            'description': "This is the core bot get product/s information",
-            'data': pj
-        }
-        callback (null, data);
-    };
 
-// Product Aux methods
-    var getProductFromText = function getProductFromText(text) {
-        var tags = text.toLowerCase().split(' ');
+        core.search.products(text).then(function(results) {
+            var products = results.map(function(entry) {
+                return sdhProductsByID[entry._source.product_id];
+            });
 
-        log.debug(tags);
-        var data = [];
-        for (var d = 0; d < tags.length; d++) {
-            if (tags[d] in sdhProductsByID) {
-                data.push(tags[d]);
-            } else if (tags[d] in sdhProductsByName){
-                data.push(sdhProductsByName[tags[d]].productid);
+            var data = {
+                'title': "Product Information",
+                'description': "This is the core bot get product/s information",
+                'data': products
             }
-        }
-        return data;
+            callback (null, data);
+        });
+
     };
+
 
     var project = function project(callback, text) {
-        log.info("project info ---> " + text);
-        var projList = getProjectFromText(text);
-        log.debug(projList);
-        var pj = [];
-        for (var i = 0; i < projList.length; i++) {
-            pj.push(sdhProjectsByID[projList[i]]);
-        }
-        var data = {
-            'title': "Project Information",
-            'description': "This is the core bot get project/s information",
-            'data': pj
-        }
-        callback (null, data);
-    };
 
-// Project Aux methods
-    var getProjectFromText = function getProjectFromText(text) {
-        var tags = text.toLowerCase().split(' ');
+        core.search.projects(text).then(function(results) {
+            var projects = results.map(function(entry) {
+                return sdhProjectsByID[entry._source.project_id];
+            });
 
-        log.debug(tags);
-        var data = [];
-        for (var d = 0; d < tags.length; d++) {
-            if (tags[d] in sdhProjectsByID) {
-                data.push(tags[d]);
-            } else if (tags[d] in sdhProjectsByName){
-                data.push(sdhProjectsByName[tags[d]].projectid);
+            var data = {
+                'title': "Project Information",
+                'description': "This is the core bot get project/s information",
+                'data': projects
             }
-        }
-        return data;
+            callback (null, data);
+        });
+
     };
 
     var repo = function repo(callback, text) {
-        log.info("repo info ---> " + text);
-        var repoList = getRepoFromText(text);
-        log.debug(repoList);
-        var rp = [];
-        for (var i = 0; i < repoList.length; i++) {
-            rp.push(sdhReposByID[repoList[i]]);
-        }
-        var data = {
-            'title': "Repository Information",
-            'description': "This is the core bot get repository/ies information",
-            'data': rp
-        }
-        callback (null, data);
-    };
 
-// Repos Aux methods
-    var getRepoFromText = function getRepoFromText(text) {
-        var tags = text.toLowerCase().split(' ');
-        log.debug(tags);
-        var repo = [];
-        for (var d = 0; d < tags.length; d++) {
-            if (tags[d] in sdhReposByID) {
-                repo.push(tags[d]);
-            } else if (tags[d] in sdhReposByName){
-                repo.push(sdhReposByName[tags[d]].repositoryid);
+        core.search.repositories(text).then(function(results) {
+            var repositories = results.map(function(entry) {
+                return sdhReposByID[entry._source.repo_id];
+            });
+
+            var data = {
+                'title': "Repository Information",
+                'description': "This is the core bot get repository/ies information",
+                'data': repositories
             }
-        }
-        return repo;
-    };
+            callback (null, data);
+        });
 
-// Members aux methods
+    };
 
     var member = function member(callback, text) {
-        log.info("member info ---> " + text);
-        var user = getUserFromText(text);
-        log.debug(user);
-        if(user) {
+
+        var returnData = function(users) {
             var data = {
                 'title': "User Information",
                 'description': "This is the core bot get member/s information",
-                'data': user
+                'data': users
             }
             callback (null, data);
+        }
+
+        if(text.substr(0, 6) === "sdhid:") {
+            var sdhId = text.substring(6);
+            returnData(sdhUsersByID[sdhId]);
+
         } else {
-            callback(null, "Could not find that member");
+            core.search.users(text).then(function(results) {
+                var users = results.map(function(entry) {
+                    return sdhUsersByID[entry._source.user_id];
+                });
+                returnData(users);
+            });
         }
 
     };
-
-    var getUserFromText = function(text) {
-        text = text.trim();
-        var sdhId;
-        if(text.substr(0, 6) === "sdhid:") {
-            sdhId = text.substring(6);
-            return sdhUsersByID[sdhId];
-        } else { // Find in the index
-            for (sdhId in sdhUsersByID) {
-
-                var user = sdhUsersByID[sdhId];
-
-                if(user.name.toLowerCase().indexOf(text.toLowerCase()) !== -1 || user.nick === text) { //Find by partial name or exact nick
-                    return user;
-                } else {
-                    for(var e = 0; e < user.email.length; e++) { //Find by exact email
-                        if(user.email[e] === text) {
-                            return user;
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
 
     var allMetrics = function allMetrics(callback) {
         core.data.getSDHMetrics(callback);
@@ -235,42 +173,6 @@ module.exports = function(core, log) {
     var allMembers = function allMembers(callback) {
         core.data.getSDHMembers(callback);
     };
-    var sdhParser = function sdhParser(clientId, msg, callback) {
-
-        var origTagsAux = msg.text.split(' ');
-        var origTags = [];
-        for (var d = 0; d < origTagsAux.length; d++) {
-            //TODO
-            if (origTagsAux[d] !== "" && origTagsAux[d] !== "elastic" && origTagsAux[d].indexOf(botId.toLowerCase()) == -1) {
-                origTags.push(origTagsAux[d]);
-            }
-        }
-        /*elastic.getSuggestions(origTags).then(function (result) {
-         log.info("--Result for: " + origTags);
-         for (var i = 0; i < result.docsuggest[0].options.length; i++) {
-         log.info("elasticSearch: '" + result.docsuggest[0].options[i].text + "' --score:" + result.docsuggest[0].options[i].score);
-         }
-         });*/
-        elastic.search(msg.text, indexName).then(function (result) {
-            log.info("-Simple E.S search for: " + msg.text);
-            for (var i = 0; i < result.hits.hits.length; i++) {
-                log.debug("hit " + i + ": '" + result.hits.hits[i]._source.title + "' ;score: " + result.hits.hits[i]._score);
-            }
-        });
-    };
-
-    var parseTags = function parseTags(msg) {
-        var origTagsAux = msg.split(' ');
-        var origTags = [];
-        for (var d = 0; d < origTagsAux.length; d++) {
-            //TODO
-            if (origTagsAux[d] !== "") {
-                origTags.push(origTagsAux[d]);
-            }
-        }
-        return origTags;
-    };
-
 
     return {
         helpme: helpme,
