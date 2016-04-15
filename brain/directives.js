@@ -34,8 +34,17 @@ module.exports = function(log) {
             Math.floor(value) === value;
     };
 
+    var RgxSubstr = function RgxSubstr(pos) {
+        this.pos = pos;
+    }
 
-    _exports.registerDirective =function(pattern, operation, mappings) {
+    RgxSubstr.prototype.getValueInMatch = function(rgxResult) {
+        return rgxResult[this.pos + 1];
+    }
+    _exports.RgxSubstr = RgxSubstr;
+
+
+    _exports.registerDirective = function(pattern, operation, mappings) {
 
         try {
             var regex = (pattern instanceof RegExp ? pattern : new RegExp(pattern));
@@ -72,6 +81,23 @@ module.exports = function(log) {
         //TODO
     };
 
+    var replaceMappings = function(mappings, matches) {
+
+        var newObj = mappings;
+        if (mappings && typeof mappings === 'object') {
+            newObj = mappings instanceof Array ? [] : {};
+            for (var i in mappings) {
+                if(mappings[i] instanceof RgxSubstr) {
+                    newObj[i] = mappings[i].getValueInMatch(matches)
+                } else {
+                    newObj[i] = replaceMappings(mappings[i], matches);
+                }
+            }
+        }
+        return newObj;
+
+    };
+
     _exports.handleMessage = function(msg, cb) {
 
         for(var regexStr in directives) {
@@ -87,7 +113,9 @@ module.exports = function(log) {
                 var operationArgs = [ cb ];
 
                 if(mappings) {
-                    for(var a = 0; a < mappings.length; a++) {
+                    operationArgs = operationArgs.concat(replaceMappings(mappings, substrings));
+
+                    /*for(var a = 0; a < mappings.length; a++) {
                         var value = mappings[a];
                         if(typeof value === "number" && Math.floor(value) === value && value < substrings.length - 1) {
                             operationArgs.push(substrings[value + 1]);
@@ -96,7 +124,7 @@ module.exports = function(log) {
                         } else {
                             log.warn("Invalid mapping '"+ value +"'for " + regexStr);
                         }
-                    }
+                    }*/
                 }
 
                 // Execute operation
