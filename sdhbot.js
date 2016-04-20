@@ -28,7 +28,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
     throw error;
 });
 
-module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, log) {
+module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, imagesServiceUrl, log) {
 
     var core = {};
 
@@ -68,7 +68,7 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, log) {
         log.info("... Loading SDH BOT CORE ...");
 
         // Load methods to access SDH data
-        core.data = require('./brain/sdhBasic.js')(sdhApiUrl, log);
+        core.data = require('./brain/sdhBasic.js')(sdhApiUrl, imagesServiceUrl, log);
 
         // Load core operations into the core object
         core.ops = require('./brain/operations.js')(core, log);
@@ -108,26 +108,26 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, log) {
             //Members
             sdhData.getSDHMembersAsync().then(function (members) {
                 for (var i = 0; i < members.length; i++) {
-                    sdhUsersByID[members[i].userid] = members[i];
+                    sdhUsersByID[members[i].uid] = members[i];
                 }
             }),
             //Repositories
             sdhData.getSDHRepositoriesAsync().then(function (rep) {
                 for (var i = 0; i < rep.length; i++) {
-                    sdhReposByID[rep[i].repositoryid] = rep[i];
+                    sdhReposByID[rep[i].rid] = rep[i];
                     sdhReposByName[rep[i].name] = rep[i];
                 }
             }),
             //Products
             sdhData.getSDHProductsAsync().then(function (prod) {
                 for (var i = 0; i < prod.length; i++) {
-                    sdhProductsByID[prod[i].productid] = prod[i];
+                    sdhProductsByID[prod[i].prid] = prod[i];
                 }
             }),
             //Projects
             sdhData.getSDHProjectsAsync().then(function (proj) {
                 for (var i = 0; i < proj.length; i++) {
-                    sdhProjectsByID[proj[i].projectid] = proj[i];
+                    sdhProjectsByID[proj[i].pjid] = proj[i];
                 }
             }),
             //Organizations

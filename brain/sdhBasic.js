@@ -24,7 +24,7 @@
 
 var request = require('request');
 
-module.exports = function(sdhApiUrl, log) {
+module.exports = function(sdhApiUrl, imagesServiceUrl, log) {
 
     var _exports = {};
 
@@ -116,7 +116,18 @@ module.exports = function(sdhApiUrl, log) {
         requestApiUri(getValidAPIUri('organizations/' + oid), callback);
     };
 
+    _exports.getMetricsChart = function(options, callback) {
+        request.post({url:imagesServiceUrl + '/persistent-image', json: options}, function(err, response, body) {
+            if(!err && response.statusCode == 200) {
+                callback(null, response.headers['location']);
+            } else {
+                callback(new Error("Could not retrieve an image from the images service: " + body));
+            }
+
+        })
+    };
+
     return _exports;
 
-}
+};
 

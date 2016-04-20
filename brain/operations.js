@@ -23,6 +23,7 @@
 'use strict';
 
 var Promise = require("bluebird");
+var request = require("request");
 
 // Do not silently capture errors
 Promise.onPossiblyUnhandledRejection(function(error){
@@ -52,14 +53,22 @@ module.exports = function(core, log) {
             'data': data
         });
     };
-    
+
     var metric = function metric(callback, mid, options) {
-        // TODO extract metric id, subjects and range information from msg to generate metric options
+        // TODO extract range information (from, to)
 
         var getSDHMetricInfo = Promise.promisify(core.data.getSDHMetricInfo);
         var getSDHMetric = Promise.promisify(core.data.getSDHMetric);
 
         var params = {};
+
+        if(options.aggr) {
+            params['aggr'] = options.aggr;
+        }
+
+        if(options.max) {
+            params['max'] = options.max;
+        }
 
         getSDHMetricInfo(mid).then(function(metricInfo) {
 
@@ -69,23 +78,24 @@ module.exports = function(core, log) {
                     throw new Error("Metric not found. The given metric does not require parameters.")
                 }
 
-                if(options.param.substr(0, 6) === "sdhid:") {
+                if(options.param.substr(0, 6) === "sdhid:") { //The id of the user has been specified from the interface
                     if(metricInfo.params.indexOf("uid") === -1) {
                         throw new Error("Metric not found. The given metric does not require uid parameter.")
                     }
                     params['uid'] = options.param.substring(6);
 
-                } else {
+                } else { // Try to find out the parameter of the metric
 
                     var expectedParamType = metricInfo.params[0];
                     var searchMethod;
                     switch (expectedParamType) {
                         case 'uid': searchMethod = core.search.users; break;
                         case 'prid': searchMethod = core.search.products; break;
-                        case 'pid': searchMethod = core.search.projects; break;
+                        case 'pjid': searchMethod = core.search.projects; break;
                         case 'rid': searchMethod = core.search.repositories; break;
                     }
 
+                    // Find in the search engine the entity that fits best with the text correspondin to the parameter
                     return searchMethod(options.param).then(function(results) {
                         if(results && results.length > 0) {
                             var type = results[0]._type;
@@ -98,7 +108,31 @@ module.exports = function(core, log) {
             }
 
         }).then(function() {
-            getSDHMetric(mid, params).asCallback(callback);
+
+            if(options.format === 'image') { // Return an image
+
+                var chartRequestParams = {
+                    "chart": "LinesChart",
+                    "metrics": [{
+                        "id": mid
+                    }],
+                    "configuration": {
+                        "height": 300,
+                        "area": true
+                    },
+                    "width": 700
+                }
+
+                for(var param in params) {
+                    chartRequestParams.metrics[0][param] = params[param];
+                }
+
+                core.data.getMetricsChart(chartRequestParams, callback);
+
+            } else { // Return a text representation
+                getSDHMetric(mid, params).asCallback(callback);
+            }
+
         }).catch(function(e) {
             throw e;
         })

@@ -225,16 +225,16 @@ module.exports = function(elasticSearchUrl, core, log) {
                 addAllObjects(sdhOrganizationsByID, "entities", "org", ["title", "purpose", "description", "clasification"]),
 
                 // Products
-                addAllObjects(sdhProductsByID, "entities", "product", ["productid", "name"], {trans:{productid:{name:"id"}}}),
+                addAllObjects(sdhProductsByID, "entities", "product", ["prid", "name"], {trans:{prid:{name:"id"}}}),
 
                 // Projects
-                addAllObjects(sdhProjectsByID, "entities", "project", ["projectid", "name"], {trans:{projectid:{name:"id"}}}),
+                addAllObjects(sdhProjectsByID, "entities", "project", ["pjid", "name"], {trans:{pjid:{name:"id"}}}),
 
                 // Repositories
-                addAllObjects(sdhReposByID, "entities", "repo", ["repositoryid", "name"], {trans:{repositoryid:{name:"id"}}}),
+                addAllObjects(sdhReposByID, "entities", "repo", ["rid", "name"], {trans:{rid:{name:"id"}}}),
 
                 // Users
-                addAllObjects(sdhUsersByID, "entities", "user", ["userid", "name", "nick", "email"], {trans:{userid:{name:"id"}}})
+                addAllObjects(sdhUsersByID, "entities", "user", ["uid", "name", "nick", "email"], {trans:{uid:{name:"id"}}})
 
             ];
 
