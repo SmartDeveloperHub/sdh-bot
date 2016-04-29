@@ -23,6 +23,9 @@
 
 var Promise = require("bluebird");
 
+// Load sugar library that enhances the Javascript built-in prototypes
+require("sugar");
+
 // Do not silently capture errors
 Promise.onPossiblyUnhandledRejection(function(error){
     throw error;

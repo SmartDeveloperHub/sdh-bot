@@ -30,6 +30,7 @@
     "moment": "*",
     "node-telegram-bot-api": "*",
     "request": "*",
+    "sugar": "^1.4.1",
     "valid-url": "*"
   }
 }

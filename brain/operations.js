@@ -60,82 +60,108 @@ module.exports = function(core, log) {
         var getSDHMetricInfo = Promise.promisify(core.data.getSDHMetricInfo);
         var getSDHMetric = Promise.promisify(core.data.getSDHMetric);
 
-        var params = {};
+        try {
+            var params = {};
 
-        if(options.aggr) {
-            params['aggr'] = options.aggr;
-        }
+            if(options.aggr) {
+                params['aggr'] = options.aggr;
+            }
 
-        if(options.max) {
-            params['max'] = options.max;
-        }
+            if(options.max) {
+                params['max'] = options.max;
+            }
 
-        getSDHMetricInfo(mid).then(function(metricInfo) {
+            if(options.from) {
+                var from = Date.create(options.from);
+                if(from.isValid()) {
+                    params['from'] = from.format("{yyyy}-{MM}-{dd}");
+                } else {
+                    throw new Error("'"+options.from+"' is an invalid date");
+                }
+            }
 
-            if(options.param) {
+            if(options.to) {
+                var to = Date.create(options.to);
+                if(to.isValid()) {
+                    params['to'] = to.format("{yyyy}-{MM}-{dd}");
+                } else {
+                    throw new Error("'"+options.to+"' is an invalid date");
+                }
+            }
 
-                if(metricInfo.params.length === 0 || metricInfo.params[0] == null) {
-                    throw new Error("Metric not found. The given metric does not require parameters.")
+            getSDHMetricInfo(mid).then(function(metricInfo) {
+
+                if(options.aggr && !(options.aggr in metricInfo.aggr)) {
+                    throw new Error("Aggregator " + options.aggr + " can't be used with metric " + metricInfo.id);
                 }
 
-                if(options.param.substr(0, 6) === "sdhid:") { //The id of the user has been specified from the interface
-                    if(metricInfo.params.indexOf("uid") === -1) {
-                        throw new Error("Metric not found. The given metric does not require uid parameter.")
-                    }
-                    params['uid'] = options.param.substring(6);
+                if(options.param) {
 
-                } else { // Try to find out the parameter of the metric
-
-                    var expectedParamType = metricInfo.params[0];
-                    var searchMethod;
-                    switch (expectedParamType) {
-                        case 'uid': searchMethod = core.search.users; break;
-                        case 'prid': searchMethod = core.search.products; break;
-                        case 'pjid': searchMethod = core.search.projects; break;
-                        case 'rid': searchMethod = core.search.repositories; break;
+                    if(metricInfo.params.length === 0 || metricInfo.params[0] == null) {
+                        throw new Error("Metric not found. The given metric does not require parameters.")
                     }
 
-                    // Find in the search engine the entity that fits best with the text correspondin to the parameter
-                    return searchMethod(options.param).then(function(results) {
-                        if(results && results.length > 0) {
-                            var type = results[0]._type;
-                            params[expectedParamType] = results[0]._source[type+"_id"];
+                    if(options.param.substr(0, 6) === "sdhid:") { //The id of the user has been specified from the interface
+                        if(metricInfo.params.indexOf("uid") === -1) {
+                            throw new Error("Metric not found. The given metric does not require uid parameter.")
                         }
-                    })
+                        params['uid'] = options.param.substring(6);
+
+                    } else { // Try to find out the parameter of the metric
+
+                        var expectedParamType = metricInfo.params[0];
+                        var searchMethod;
+                        switch (expectedParamType) {
+                            case 'uid': searchMethod = core.search.users; break;
+                            case 'prid': searchMethod = core.search.products; break;
+                            case 'pjid': searchMethod = core.search.projects; break;
+                            case 'rid': searchMethod = core.search.repositories; break;
+                        }
+
+                        // Find in the search engine the entity that fits best with the text correspondin to the parameter
+                        return searchMethod(options.param).then(function(results) {
+                            if(results && results.length > 0) {
+                                var type = results[0]._type;
+                                params[expectedParamType] = results[0]._source[type+"_id"];
+                            }
+                        })
+
+                    }
 
                 }
 
-            }
+            }).then(function() {
 
-        }).then(function() {
+                if(options.format === 'image') { // Return an image
 
-            if(options.format === 'image') { // Return an image
+                    var chartRequestParams = {
+                        "chart": "LinesChart",
+                        "metrics": [{
+                            "id": mid
+                        }],
+                        "configuration": {
+                            "height": 300,
+                            "area": true
+                        },
+                        "width": 700
+                    }
 
-                var chartRequestParams = {
-                    "chart": "LinesChart",
-                    "metrics": [{
-                        "id": mid
-                    }],
-                    "configuration": {
-                        "height": 300,
-                        "area": true
-                    },
-                    "width": 700
+                    for(var param in params) {
+                        chartRequestParams.metrics[0][param] = params[param];
+                    }
+
+                    core.data.getMetricsChart(chartRequestParams, callback);
+
+                } else { // Return a text representation
+                    getSDHMetric(mid, params).asCallback(callback);
                 }
 
-                for(var param in params) {
-                    chartRequestParams.metrics[0][param] = params[param];
-                }
-
-                core.data.getMetricsChart(chartRequestParams, callback);
-
-            } else { // Return a text representation
-                getSDHMetric(mid, params).asCallback(callback);
-            }
-
-        }).catch(function(e) {
-            throw e;
-        })
+            }).catch(function(e) {
+                callback(e);
+            })
+        } catch(e) {
+            callback(e);
+        }
 
     };
     var getMetricsAbout = function getMetricsAbout(callback, text) {
