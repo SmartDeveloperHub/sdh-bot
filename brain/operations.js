@@ -75,7 +75,7 @@ module.exports = function(core, log) {
                 if(from.isValid()) {
                     params['from'] = from.format("{yyyy}-{MM}-{dd}");
                 } else {
-                    throw new Error("'"+options.from+"' is an invalid date");
+                    throw new core.errors.InvalidArgument("'"+options.from+"' is an invalid date");
                 }
             }
 
@@ -84,37 +84,39 @@ module.exports = function(core, log) {
                 if(to.isValid()) {
                     params['to'] = to.format("{yyyy}-{MM}-{dd}");
                 } else {
-                    throw new Error("'"+options.to+"' is an invalid date");
+                    throw new core.errors.InvalidArgument("'"+options.to+"' is an invalid date");
                 }
             }
 
             getSDHMetricInfo(mid).then(function(metricInfo) {
 
                 if(options.aggr && !(options.aggr in metricInfo.aggr)) {
-                    throw new Error("Aggregator " + options.aggr + " can't be used with metric " + metricInfo.id);
+                    throw new core.errors.InvalidArgument("Aggregator " + options.aggr + " can't be used with metric " + metricInfo.id);
                 }
 
                 if(options.param) {
 
                     if(metricInfo.params.length === 0 || metricInfo.params[0] == null) {
-                        throw new Error("Metric not found. The given metric does not require parameters.")
+                        throw new core.errors.InvalidArgument("Metric not found. The given metric does not require parameters.")
                     }
 
                     if(options.param.substr(0, 6) === "sdhid:") { //The id of the user has been specified from the interface
                         if(metricInfo.params.indexOf("uid") === -1) {
-                            throw new Error("Metric not found. The given metric does not require uid parameter.")
+                            throw new core.errors.InvalidArgument("Metric not found. The given metric does not require uid parameter.")
                         }
                         params['uid'] = options.param.substring(6);
 
                     } else { // Try to find out the parameter of the metric
 
                         var expectedParamType = metricInfo.params[0];
-                        var searchMethod;
+                        var searchMethod, searchType;
                         switch (expectedParamType) {
-                            case 'uid': searchMethod = core.search.users; break;
-                            case 'prid': searchMethod = core.search.products; break;
-                            case 'pjid': searchMethod = core.search.projects; break;
-                            case 'rid': searchMethod = core.search.repositories; break;
+                            case 'uid': searchMethod = core.search.users; searchType = "user"; break;
+                            case 'prid': searchMethod = core.search.products; searchType = "product"; break;
+                            case 'pjid': searchMethod = core.search.projects; searchType = "project"; break;
+                            case 'rid': searchMethod = core.search.repositories; searchType = "repository"; break;
+                            default:
+                                throw new core.errors.InvalidArgument("I don't know the type of paremeter for the metric");
                         }
 
                         // Find in the search engine the entity that fits best with the text correspondin to the parameter
@@ -122,6 +124,8 @@ module.exports = function(core, log) {
                             if(results && results.length > 0) {
                                 var type = results[0]._type;
                                 params[expectedParamType] = results[0]._source[type+"_id"];
+                            } else {
+                                throw new core.errors.InvalidArgument("Couldn't find any information about "+searchType+" '" + options.param + "'");
                             }
                         })
 
@@ -194,7 +198,7 @@ module.exports = function(core, log) {
                 if(from.isValid()) {
                     params['from'] = from.format("{yyyy}-{MM}-{dd}");
                 } else {
-                    throw new Error("'"+options.from+"' is an invalid date");
+                    throw new core.errors.InvalidArgument("'"+options.from+"' is an invalid date");
                 }
             }
 
@@ -203,7 +207,7 @@ module.exports = function(core, log) {
                 if(to.isValid()) {
                     params['to'] = to.format("{yyyy}-{MM}-{dd}");
                 } else {
-                    throw new Error("'"+options.to+"' is an invalid date");
+                    throw new core.errors.InvalidArgument("'"+options.to+"' is an invalid date");
                 }
             }
 
@@ -212,12 +216,12 @@ module.exports = function(core, log) {
                 if(options.param) {
 
                     if(viewInfo.params.length === 0 || viewInfo.params[0] == null) {
-                        throw new Error("Metric not found. The given metric does not require parameters.")
+                        throw new core.errors.InvalidArgument("Metric not found. The given metric does not require parameters.")
                     }
 
                     if(options.param.substr(0, 6) === "sdhid:") { //The id of the user has been specified from the interface
                         if(viewInfo.params.indexOf("uid") === -1) {
-                            throw new Error("Metric not found. The given metric does not require uid parameter.")
+                            throw new core.errors.InvalidArgument("Metric not found. The given metric does not require uid parameter.")
                         }
                         params['uid'] = options.param.substring(6);
 
@@ -230,6 +234,8 @@ module.exports = function(core, log) {
                             case 'prid': searchMethod = core.search.products; break;
                             case 'pjid': searchMethod = core.search.projects; break;
                             case 'rid': searchMethod = core.search.repositories; break;
+                            default:
+                                throw new core.errors.InvalidArgument("I don't know the type of paremeter for the view");
                         }
 
                         // Find in the search engine the entity that fits best with the text correspondin to the parameter
@@ -237,6 +243,8 @@ module.exports = function(core, log) {
                             if(results && results.length > 0) {
                                 var type = results[0]._type;
                                 params[expectedParamType] = results[0]._source[type+"_id"];
+                            } else {
+                                throw new core.errors.InvalidArgument("Couldn't find any information about "+searchType+" '" + options.param + "'");
                             }
                         })
 

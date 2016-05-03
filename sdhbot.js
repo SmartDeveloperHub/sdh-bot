@@ -70,6 +70,8 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, imagesSe
 
         log.info("... Loading SDH BOT CORE ...");
 
+        core.errors = require('./brain/errors.js')(core);
+
         // Load methods to access SDH data
         core.data = require('./brain/sdhBasic.js')(sdhApiUrl, imagesServiceUrl, log);
 
