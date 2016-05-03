@@ -55,7 +55,6 @@ module.exports = function(core, log) {
     };
 
     var metric = function metric(callback, mid, options) {
-        // TODO extract range information (from, to)
 
         var getSDHMetricInfo = Promise.promisify(core.data.getSDHMetricInfo);
         var getSDHMetric = Promise.promisify(core.data.getSDHMetric);
@@ -164,6 +163,7 @@ module.exports = function(core, log) {
         }
 
     };
+
     var getMetricsAbout = function getMetricsAbout(callback, text) {
 
         var getSDHMetricInfo = Promise.promisify(core.data.getSDHMetricInfo);
@@ -177,9 +177,84 @@ module.exports = function(core, log) {
         });
     };
 
-    var view = function view(callback, text) {
-        // TODO extract metric id, subjects and range information from msg to generate view options
-        callback (null, "view data");
+    var view = function view(callback, vid, options) {
+
+        var getSDHViewInfo = Promise.promisify(core.data.getSDHViewInfo);
+        var getSDHView = Promise.promisify(core.data.getSDHView);
+
+        try {
+            var params = {};
+
+            if(options.max) {
+                params['max'] = options.max;
+            }
+
+            if(options.from) {
+                var from = Date.create(options.from);
+                if(from.isValid()) {
+                    params['from'] = from.format("{yyyy}-{MM}-{dd}");
+                } else {
+                    throw new Error("'"+options.from+"' is an invalid date");
+                }
+            }
+
+            if(options.to) {
+                var to = Date.create(options.to);
+                if(to.isValid()) {
+                    params['to'] = to.format("{yyyy}-{MM}-{dd}");
+                } else {
+                    throw new Error("'"+options.to+"' is an invalid date");
+                }
+            }
+
+            getSDHViewInfo(vid).then(function(viewInfo) {
+
+                if(options.param) {
+
+                    if(viewInfo.params.length === 0 || viewInfo.params[0] == null) {
+                        throw new Error("Metric not found. The given metric does not require parameters.")
+                    }
+
+                    if(options.param.substr(0, 6) === "sdhid:") { //The id of the user has been specified from the interface
+                        if(viewInfo.params.indexOf("uid") === -1) {
+                            throw new Error("Metric not found. The given metric does not require uid parameter.")
+                        }
+                        params['uid'] = options.param.substring(6);
+
+                    } else { // Try to find out the parameter of the view
+
+                        var expectedParamType = viewInfo.params[0];
+                        var searchMethod;
+                        switch (expectedParamType) {
+                            case 'uid': searchMethod = core.search.users; break;
+                            case 'prid': searchMethod = core.search.products; break;
+                            case 'pjid': searchMethod = core.search.projects; break;
+                            case 'rid': searchMethod = core.search.repositories; break;
+                        }
+
+                        // Find in the search engine the entity that fits best with the text correspondin to the parameter
+                        return searchMethod(options.param).then(function(results) {
+                            if(results && results.length > 0) {
+                                var type = results[0]._type;
+                                params[expectedParamType] = results[0]._source[type+"_id"];
+                            }
+                        })
+
+                    }
+
+                }
+
+            }).then(function() {
+
+                getSDHView(vid, params).asCallback(callback);
+
+            }).catch(function(e) {
+                callback(e);
+            })
+        } catch(e) {
+            callback(e);
+        }
+
     };
 
     var product = function product(callback, text) {

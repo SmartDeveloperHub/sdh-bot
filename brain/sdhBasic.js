@@ -50,6 +50,14 @@ module.exports = function(sdhApiUrl, imagesServiceUrl, log) {
         });
     };
 
+    var generateQueryParamsString = function generateQueryParamsString(params) {
+        var qp = [];
+        for (var param in params) {
+            qp.push(param+"="+encodeURIComponent(params[param]));
+        }
+        return (qp.length ? "?" + qp.join('&'): '');
+    };
+
     /* PUBLIC */
     _exports.getSDHMembers = function getSDHMembers(callback) {
         requestApiUri(getValidAPIUri('users'), callback);
@@ -64,12 +72,7 @@ module.exports = function(sdhApiUrl, imagesServiceUrl, log) {
     };
 
     _exports.getSDHMetric = function getSDHMetric(mid, params, callback) {
-        var qp = [];
-        for (var param in params) {
-            qp.push(param+"="+encodeURIComponent(params[param]));
-        }
-        var qpStr = (qp.length ? "?" + qp.join('&'): '');
-
+        var qpStr = generateQueryParamsString(params);
         requestApiUri(getValidAPIUri('metrics/' + mid + qpStr), callback);
     };
 
@@ -78,9 +81,12 @@ module.exports = function(sdhApiUrl, imagesServiceUrl, log) {
     };
 
     _exports.getSDHView = function getSDHView(vid, options, callback) {
-        var qp;
-        // TODO query params.. only for test by the moment testing /tbdata/view-director-products?uid=1004
-        requestApiUri(getValidAPIUri('tbdata/' + vid + '?uid=' + options.uid), callback);
+        var qpStr = generateQueryParamsString(options);
+        requestApiUri(getValidAPIUri('tbdata/' + vid + qpStr), callback);
+    };
+
+    _exports.getSDHViewInfo = function getSDHViewInfo(id, callback) {
+        requestApiUri(getValidAPIUri('tbdatainfo/' + id), callback);
     };
 
     _exports.getSDHProducts = function getSDHProducts (callback) {

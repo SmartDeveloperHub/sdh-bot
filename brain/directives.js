@@ -114,17 +114,6 @@ module.exports = function(log) {
 
                 if(mappings) {
                     operationArgs = operationArgs.concat(replaceMappings(mappings, substrings));
-
-                    /*for(var a = 0; a < mappings.length; a++) {
-                        var value = mappings[a];
-                        if(typeof value === "number" && Math.floor(value) === value && value < substrings.length - 1) {
-                            operationArgs.push(substrings[value + 1]);
-                        } else if(typeof value === 'string') {
-                            operationArgs.push(value);
-                        } else {
-                            log.warn("Invalid mapping '"+ value +"'for " + regexStr);
-                        }
-                    }*/
                 }
 
                 // Execute operation
