@@ -267,17 +267,20 @@ module.exports = function(core, log) {
 
     var product = function product(callback, text) {
 
+        var returnData = function(data) {
+            if(!data) {
+                callback (new core.errors.InvalidArgument("I could not find product \"" + text + "\""));
+            } else {
+                callback (null, data);
+            }
+        };
+
         core.search.products(text).then(function(results) {
             var products = results.map(function(entry) {
                 return sdhProductsByID[entry._source.product_id];
             });
 
-            var data = {
-                'title': "Product Information",
-                'description': "This is the core bot get product/s information",
-                'data': products
-            }
-            callback (null, data);
+            callback (null, returnData(products[0]));
         });
 
     };
@@ -285,48 +288,53 @@ module.exports = function(core, log) {
 
     var project = function project(callback, text) {
 
+        var returnData = function(data) {
+            if(!data) {
+                callback (new core.errors.InvalidArgument("I could not find project \"" + text + "\""));
+            } else {
+                callback (null, data);
+            }
+        };
+
         core.search.projects(text).then(function(results) {
             var projects = results.map(function(entry) {
                 return sdhProjectsByID[entry._source.project_id];
             });
 
-            var data = {
-                'title': "Project Information",
-                'description': "This is the core bot get project/s information",
-                'data': projects
-            }
-            callback (null, data);
+            callback (null, returnData(projects[0]));
         });
 
     };
 
     var repo = function repo(callback, text) {
 
+        var returnData = function(data) {
+            if(!data) {
+                callback (new core.errors.InvalidArgument("I could not find repository \"" + text + "\""));
+            } else {
+                callback (null, data);
+            }
+        };
+
         core.search.repositories(text).then(function(results) {
             var repositories = results.map(function(entry) {
                 return sdhReposByID[entry._source.repo_id];
             });
 
-            var data = {
-                'title': "Repository Information",
-                'description': "This is the core bot get repository/ies information",
-                'data': repositories
-            }
-            callback (null, data);
+            callback (null, returnData(repositories[0]));
         });
 
     };
 
     var member = function member(callback, text) {
 
-        var returnData = function(users) {
-            var data = {
-                'title': "User Information",
-                'description': "This is the core bot get member/s information",
-                'data': users
+        var returnData = function(data) {
+            if(!data) {
+                callback (new core.errors.InvalidArgument("I could not find member \"" + text + "\""));
+            } else {
+                callback (null, data);
             }
-            callback (null, data);
-        }
+        };
 
         if(text.substr(0, 6) === "sdhid:") {
             var sdhId = text.substring(6);
@@ -337,7 +345,7 @@ module.exports = function(core, log) {
                 var users = results.map(function(entry) {
                     return sdhUsersByID[entry._source.user_id];
                 });
-                returnData(users);
+                returnData(users[0]);
             });
         }
 
