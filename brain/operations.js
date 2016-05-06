@@ -265,6 +265,19 @@ module.exports = function(core, log) {
 
     };
 
+    var getViewsAbout = function getViewsAbout(callback, text) {
+
+        var getSDHViewInfo = Promise.promisify(core.data.getSDHViewInfo);
+
+        core.search.views(text).then(function(results) {
+            var views = results.map(function(entry) {
+                var id = entry._source.view_id;
+                return getSDHViewInfo(id); //TODO: reflect?
+            });
+            Promise.all(views).asCallback(callback);
+        });
+    };
+
     var product = function product(callback, text) {
 
         var returnData = function(data) {
@@ -378,6 +391,7 @@ module.exports = function(core, log) {
         allMetrics: allMetrics,
         getMetricsAbout: getMetricsAbout,
         allViews: allViews,
+        getViewsAbout: getViewsAbout,
         allOrgs: allOrgs,
         allProducts: allProducts,
         allProjects: allProjects,

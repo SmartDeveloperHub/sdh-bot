@@ -221,6 +221,11 @@ module.exports = function(elasticSearchUrl, core, log) {
                     return addAll(metrics, "entities", "metric", ["id", "title", "description"]);
                 }),
 
+                // Views
+                sdhData.getSDHViewsAsync().then(function(views) {
+                    return addAll(views, "entities", "view", ["id"]);
+                }),
+
                 // Organization
                 addAllObjects(sdhOrganizationsByID, "entities", "org", ["title", "purpose", "description", "clasification"]),
 
@@ -248,6 +253,10 @@ module.exports = function(elasticSearchUrl, core, log) {
 
     _exports.metrics = function(text, options) {
         return makeMultiMatchQuery("entities", ["metric_id^3", "metric_title^2", "metric_description"], text, options);
+    }
+
+    _exports.views = function(text, options) {
+        return makeMultiMatchQuery("entities", ["view_id"], text, options);
     }
 
     _exports.products = function(text, options) {
