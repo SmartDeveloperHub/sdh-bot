@@ -68,6 +68,8 @@ module.exports = function(core, log) {
 
             if(options.max) {
                 params['max'] = options.max;
+            } else {
+                params['max'] = 1;
             }
 
             if(options.from) {
@@ -86,6 +88,13 @@ module.exports = function(core, log) {
                 } else {
                     throw new core.errors.InvalidArgument("'"+options.to+"' is an invalid date");
                 }
+            }
+
+            // It to is < than from, swap them
+            if(params['from'] && params['to'] && params['to'] < params['from']) {
+                var tmp = params['from'];
+                params['from'] = params['to'];
+                params['to'] = tmp;
             }
 
             getSDHMetricInfo(mid).then(function(metricInfo) {
@@ -144,7 +153,9 @@ module.exports = function(core, log) {
                         }],
                         "configuration": {
                             "height": 300,
-                            "area": true
+                            "area": true,
+                            "xlabel": '',
+                            "ylabel": '',
                         },
                         "width": 700
                     }
@@ -188,10 +199,6 @@ module.exports = function(core, log) {
 
         try {
             var params = {};
-
-            if(options.max) {
-                params['max'] = options.max;
-            }
 
             if(options.from) {
                 var from = Date.create(options.from);
