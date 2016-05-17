@@ -21,6 +21,7 @@
 
 'use strict';
 
+var Promise = require("bluebird");
 var directives = {};
 
 //TODO: export this method to the core root
@@ -34,12 +35,32 @@ module.exports = function(log) {
             Math.floor(value) === value;
     };
 
-    var RgxSubstr = function RgxSubstr(pos) {
+    /**
+     *
+     * @param pos The number of the capture group (starting from cero)
+     * @param replaceMethod Optional. Regexp to find a value to replace or a function to execute.
+     * @param replaceWith Optional. The value to replace with.
+     * @constructor
+     */
+    var RgxSubstr = function RgxSubstr(pos, replaceMethod, replaceWith) {
         this.pos = pos;
+        if(replaceMethod instanceof RegExp && replaceWith) {
+            this.replaceRegexp = replaceRegexp;
+            this.replaceWith = replaceWith;
+        } else if (typeof replaceMethod === 'function') {
+            this.replaceFunction = replaceMethod;
+        }
     }
 
-    RgxSubstr.prototype.getValueInMatch = function(rgxResult) {
-        return rgxResult[this.pos + 1];
+    RgxSubstr.prototype.getValueInMatch = function(rgxResult, extraInfo) {
+        var value = rgxResult[this.pos + 1];
+        if(this.replaceRegexp) {
+            return (value + "").replace(this.replaceRegexp, this.replaceWith);
+        } else if(this.replaceFunction) {
+            return this.replaceFunction(value, extraInfo);
+        } else {
+            return value;
+        }
     }
     _exports.RgxSubstr = RgxSubstr;
 
@@ -76,21 +97,18 @@ module.exports = function(log) {
             return false;
         }
 
-        //TODO: mapping contiene un array que indica para cada argument de la operación la variable del pattern que le corresponde o un texto
-        //TODO: ejemplo [1,0,"coche"] sería que el primer param de la operacion es la segunda variable de la regex, el segundo es la primera y el tercero un texto "coche"
-        //TODO
     };
 
-    var replaceMappings = function(mappings, matches) {
+    var replaceMappings = function(mappings, matches, extraInfo) {
 
         var newObj = mappings;
         if (mappings && typeof mappings === 'object') {
             newObj = mappings instanceof Array ? [] : {};
             for (var i in mappings) {
                 if(mappings[i] instanceof RgxSubstr) {
-                    newObj[i] = mappings[i].getValueInMatch(matches)
+                    newObj[i] = mappings[i].getValueInMatch(matches, extraInfo)
                 } else {
-                    newObj[i] = replaceMappings(mappings[i], matches);
+                    newObj[i] = replaceMappings(mappings[i], matches, extraInfo);
                 }
             }
         }
@@ -98,7 +116,7 @@ module.exports = function(log) {
 
     };
 
-    _exports.handleMessage = function(msg, cb) {
+    _exports.handleMessage = function(msg, cb, extraInfo) {
 
         for(var regexStr in directives) {
             var directive = directives[regexStr];
@@ -113,11 +131,20 @@ module.exports = function(log) {
                 var operationArgs = [ cb ];
 
                 if(mappings) {
-                    operationArgs = operationArgs.concat(replaceMappings(mappings, substrings));
+                    operationArgs = operationArgs.concat(replaceMappings(mappings, substrings, extraInfo));
                 }
 
-                // Execute operation
-                directive.operation.apply(null, operationArgs);
+                // Execute operation after all the promisses (if any) have been fullfilled
+                Promise.map(operationArgs, function(arg) {
+                    if(typeof arg === 'object') {
+                        return Promise.props(arg); //If is a map object, make sure all the properties have been fullfilled
+                    } else {
+                        return arg;
+                    }
+                }).then(function(argValues) {
+                    directive.operation.apply(null, argValues);
+                });
+
                 return true;
             }
         }
