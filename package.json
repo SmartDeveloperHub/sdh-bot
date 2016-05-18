@@ -3,11 +3,18 @@
   "version": "0.0.1-c",
   "description": "Smart Developer Hub SlackBot",
   "license": "Apache-2.0",
-  "author": {
-    "name": "Carlos Blanco Vallejo",
-    "email": "carlos.blanco@centeropenmiddleware.com",
-    "url": "https://github.com/cblanco"
-  },
+  "contributors": [
+    {
+      "name": "Alejandro Vera De Juan",
+      "email": "averadejuan@gmail.com",
+      "url": "https://github.com/AlejandroVera"
+    },
+    {
+      "name": "Carlos Blanco Vallejo",
+      "email": "carlos.blanco@centeropenmiddleware.com",
+      "url": "https://github.com/cblanco"
+    }
+  ],
   "keywords": [
     "bot",
     "upm",
@@ -22,13 +29,7 @@
   "dependencies": {
     "bluebird": "^3.3.4",
     "botkit": "*",
-    "bunyan": "*",
-    "bunyan-prettystream": "*",
     "elasticsearch": "^11.0.0",
-    "google-images": "*",
-    "mkdirp": "*",
-    "moment": "*",
-    "node-telegram-bot-api": "*",
     "request": "*",
     "sugar": "^1.4.1",
     "valid-url": "*"
