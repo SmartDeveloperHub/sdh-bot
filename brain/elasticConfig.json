@@ -1,0 +1,213 @@
+[
+  {
+    "index": "entities",
+    "mappings": [
+      {
+        "class": "metric",
+        "attributes": {
+          "id": {
+            "type": "string",
+            "analyzer": "simple"
+          },
+          "name": {
+            "type": "string",
+            "analyzer": "snowball"
+          },
+          "description": {
+            "type": "string",
+            "analyzer": "snowball"
+          }
+        },
+        "data": {
+          "method": "getSDHMetrics",
+          "attributes": ["id", "title", "description"]
+        },
+        "operations": [
+          {
+            "name": "metrics",
+            "search": ["id^3", "title^2", "description"]
+          }
+        ]
+      },
+      {
+        "class": "view",
+        "attributes": {
+          "id": {
+            "type": "string",
+            "analyzer": "simple"
+          }
+        },
+        "data": {
+          "method": "getSDHViews",
+          "attributes": ["id"]
+        },
+        "operations": [
+          {
+            "name": "views",
+            "search": ["id"]
+          }
+        ]
+      },
+      {
+        "class": "org",
+        "attributes": {
+          "title": {
+            "type": "string",
+            "analyzer": "simple"
+          },
+          "purpose": {
+            "type": "string",
+            "analyzer": "snowball"
+          },
+          "description": {
+            "type": "string",
+            "analyzer": "snowball"
+          },
+          "clasification": {
+            "type": "string",
+            "analyzer": "simple"
+          }
+        },
+        "data": {
+          "method": "getSDHOrganizations",
+          "attributes": ["title", "purpose", "description", "clasification"]
+        },
+        "operations": []
+      },
+      {
+        "class": "product",
+        "attributes": {
+          "id": {
+            "type": "string",
+            "analyzer": "simple"
+          },
+          "name": {
+            "type": "string",
+            "analyzer": "simple"
+          }
+        },
+        "data": {
+          "method": "getSDHProducts",
+          "attributes": ["prid", "name"],
+          "config": {
+            "trans":{
+              "prid":{
+                "name":"id"
+              }
+            }
+          }
+        },
+        "operations": [
+          {
+            "name": "products",
+            "search": ["id^2", "name"]
+          }
+        ]
+      },
+      {
+        "class": "project",
+        "attributes": {
+          "id": {
+            "type": "string",
+            "analyzer": "simple"
+          },
+          "name": {
+            "type": "string",
+            "analyzer": "simple"
+          }
+        },
+        "data": {
+          "method": "getSDHProjects",
+          "attributes": ["pjid", "name"],
+          "config": {
+            "trans":{
+              "pjid":{
+                "name":"id"
+              }
+            }
+          }
+        },
+        "operations": [
+          {
+            "name": "projects",
+            "search": ["id^2", "name"]
+          }
+        ]
+      },
+      {
+        "class": "repo",
+        "attributes": {
+          "id": {
+            "type": "string",
+            "analyzer": "simple"
+          },
+          "name": {
+            "type": "string",
+            "analyzer": "simple"
+          }
+        },
+        "data": {
+          "method": "getSDHRepositories",
+          "attributes": ["rid", "name"],
+          "config": {
+            "trans":{
+              "rid":{
+                "name":"id"
+              }
+            }
+          }
+        },
+        "operations": [
+          {
+            "name": "repositories",
+            "search": ["id^2", "name"]
+          }
+        ]
+      },
+      {
+        "class": "user",
+        "attributes": {
+          "id": {
+            "type": "string",
+            "analyzer": "simple"
+          },
+          "name": {
+            "type": "string",
+            "analyzer": "simple"
+          },
+          "nick": {
+            "type": "string",
+            "analyzer": "simple"
+          },
+          "email": {
+            "type": "string",
+            "analyzer": "simple"
+          }
+        },
+        "data": {
+          "method": "getSDHMembers",
+          "attributes": ["uid", "name", "nick", "email"],
+          "config": {
+            "trans":{
+              "uid":{
+                "name":"id"
+              }
+            }
+          }
+        },
+        "operations": [
+          {
+            "name": "users",
+            "search": ["id^3", "email^3", "nick^2", "name"]
+          }
+        ]
+      }
+    ],
+    "operations": [
+      {
+        "name": "general",
+        "search": ["org_*", "product_*", "project_*", "repo_*", "user_*"]
+      }
+    ]
+  }
+]

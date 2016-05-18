@@ -1,3 +1,25 @@
+/*
+
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      This file is part of the Smart Developer Hub Project:
+        http://www.smartdeveloperhub.org/
+      Center for Open Middleware
+            http://www.centeropenmiddleware.com/
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Copyright (C) 2015 Center for Open Middleware.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+      Licensed under the Apache License, Version 2.0 (the "License");
+      you may not use this file except in compliance with the License.
+      You may obtain a copy of the License at
+                http://www.apache.org/licenses/LICENSE-2.0
+      Unless required by applicable law or agreed to in writing, software
+      distributed under the License is distributed on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+      See the License for the specific language governing permissions and
+     limitations under the License.
+    #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=#
+*/
+
 var Promise = require("bluebird");
 
 // Do not silently capture errors
@@ -73,7 +95,7 @@ module.exports = function(elasticSearchUrl, core, log) {
             return addDocument(index, type, data, params, options);
         });
         return Promise.all(prom);
-    }
+    };
 
     var addAllObjects = function(map, index, type, params, options) {
 
@@ -86,7 +108,7 @@ module.exports = function(elasticSearchUrl, core, log) {
         }
 
         return Promise.all(proms);
-    }
+    };
 
     var createMapping = function(index, type, props) {
 
@@ -111,7 +133,7 @@ module.exports = function(elasticSearchUrl, core, log) {
                 properties: properties
             }
         });
-    }
+    };
 
     var makeMultiMatchQuery = function(index, fields, text, options) {
 
@@ -144,6 +166,36 @@ module.exports = function(elasticSearchUrl, core, log) {
             return null;
         });
 
+    };
+
+    var configData = require("./elasticConfig.json");
+
+    for(var i = 0; i < configData.length; i++) {
+        var index = configData[i];
+
+        // Create index mappings operations
+        for(var m = 0; m < index.mappings.length; m++) {
+            var mapping = index.mappings[m];
+
+            for(var o = 0; o < mapping.operations.length; o++) {
+                var operation = mapping.operations[o];
+
+                //Add mapping class to search parameters
+                var searchParams = [];
+                for(var s = 0; s < operation.search.length; s++) {
+                    searchParams.push(mapping.class + "_" + operation.search[s]);
+                }
+                _exports[operation.name] = makeMultiMatchQuery.bind(undefined, index.index, searchParams);
+            }
+
+        }
+
+        // Create index general operations
+        for(o = 0; o < index.operations.length; o++) {
+            operation = index.operations[o];
+            _exports[operation.name] = makeMultiMatchQuery.bind(undefined, index.index, operation.search);
+        }
+
     }
 
 
@@ -152,132 +204,76 @@ module.exports = function(elasticSearchUrl, core, log) {
     // ----------------------------------------------------------
     _exports.fillWithData = function() {
 
-        return elasticClient.indices.exists({
-            index: "entities"
-        }).then(function(exists) {
-            if(exists) {
-                return elasticClient.indices.delete({
-                    index: "entities"
+        var configData = require("./elasticConfig.json");
+        var promises = [];
+
+        for(var i = 0; i < configData.length; i++) {
+            var index = configData[i];
+            var promise;
+
+            // Delete index if exists
+            promise = elasticClient.indices.exists({
+                index: index.index
+            }).then(function(index, exists) {
+                if(exists) {
+                    return elasticClient.indices.delete({
+                        index: index.index
+                    });
+                }
+            }.bind(null, index)).then(function(index) {
+                return elasticClient.indices.create({
+                    index: index.index
                 });
-            }
-        }).then(function() {
-            return elasticClient.indices.create({
-                index: "entities"
-            });
-        }).then(function() {
+            }.bind(null, index));
 
-            var mappingProms = [
+            // Create index mappings
+            promise = promise.then(function() {
 
-                // Metrics
-                createMapping("entities", "metric", {
-                    id: { type: "string", "analyzer": "simple" },
-                    name: { type: "string", "analyzer": "snowball" },
-                    description: { type: "string", "analyzer": "snowball" }
-                }),
+                var mappingProms = [];
 
-                // Organization
-                createMapping("entities", "org", {
-                    title: { type: "string", "analyzer": "simple" },
-                    purpose: { type: "string", "analyzer": "snowball" },
-                    description: { type: "string", "analyzer": "snowball" },
-                    clasification: { type: "string", "analyzer": "simple" }
-                }),
+                for(var m = 0; m < index.mappings.length; m++) {
+                    var mapping = index.mappings[m];
+                    mappingProms.push(createMapping(index.index, mapping.class, mapping.attributes));
+                }
 
-                // Products
-                createMapping("entities", "product", {
-                    id: { type: "string", "analyzer": "simple" },
-                    name: { type: "string", "analyzer": "simple" }
-                }),
+                return Promise.all(mappingProms);
 
-                // Projects
-                createMapping("entities", "project", {
-                    id: { type: "string", "analyzer": "simple" },
-                    name: { type: "string", "analyzer": "simple" }
-                }),
+            }.bind(null, index));
 
-                // Repositories
-                createMapping("entities", "repo", {
-                    id: { type: "string", "analyzer": "simple" },
-                    name: { type: "string", "analyzer": "simple" }
-                }),
+            // Fill with data
+            promise = promise.then(function(index) {
 
-                // Users
-                createMapping("entities", "user", {
-                    id: { type: "string", "analyzer": "simple" },
-                    name: { type: "string", "analyzer": "simple" },
-                    nick: { type: "string", "analyzer": "simple" },
-                    email: { type: "string", "analyzer": "simple" }
-                })
-            ];
+                var fillDataProms = [];
 
-            return Promise.all(mappingProms);
+                for(var m = 0; m < index.mappings.length; m++) {
+                    var mapping = index.mappings[m];
+                    var dataMethod;
 
-        }).then(function() {
+                    // Check that the method provided exists in core.data and promisify it
+                    if(typeof core.data[mapping.data.method] === 'function') {
+                        dataMethod = Promise.promisify(core.data[mapping.data.method])
+                    }
 
-            var dumpPromises = [
+                    // Call the method to retrieve the data and then add it to elestic search
+                    var prom = dataMethod().then(function(index, mapping, data) {
+                        return addAll(data, index.index, mapping.class, mapping.data.attributes);
+                    }.bind(null, index, mapping));
 
-                // Metrics
-                sdhData.getSDHMetricsAsync().then(function(metrics) {
-                    return addAll(metrics, "entities", "metric", ["id", "title", "description"]);
-                }),
+                    fillDataProms.push(prom);
+                }
 
-                // Views
-                sdhData.getSDHViewsAsync().then(function(views) {
-                    return addAll(views, "entities", "view", ["id"]);
-                }),
+                return Promise.all(fillDataProms);
 
-                // Organization
-                addAllObjects(sdhOrganizationsByID, "entities", "org", ["title", "purpose", "description", "clasification"]),
+            }.bind(null, index));
 
-                // Products
-                addAllObjects(sdhProductsByID, "entities", "product", ["prid", "name"], {trans:{prid:{name:"id"}}}),
 
-                // Projects
-                addAllObjects(sdhProjectsByID, "entities", "project", ["pjid", "name"], {trans:{pjid:{name:"id"}}}),
+            promises.push(promise);
 
-                // Repositories
-                addAllObjects(sdhReposByID, "entities", "repo", ["rid", "name"], {trans:{rid:{name:"id"}}}),
+        }
 
-                // Users
-                addAllObjects(sdhUsersByID, "entities", "user", ["uid", "name", "nick", "email"], {trans:{uid:{name:"id"}}})
-
-            ];
-
-            return Promise.all(dumpPromises).catch(function(e) {
-                log.error(e);
-            });
-
-        });
+        return Promise.all(promises);
 
     };
-
-    _exports.metrics = function(text, options) {
-        return makeMultiMatchQuery("entities", ["metric_id^3", "metric_title^2", "metric_description"], text, options);
-    }
-
-    _exports.views = function(text, options) {
-        return makeMultiMatchQuery("entities", ["view_id"], text, options);
-    }
-
-    _exports.products = function(text, options) {
-        return makeMultiMatchQuery("entities", ["product_id^2", "product_name"], text, options);
-    }
-
-    _exports.projects = function(text, options) {
-        return makeMultiMatchQuery("entities", ["project_id^2", "project_name"], text, options);
-    }
-
-    _exports.repositories = function(text, options) {
-        return makeMultiMatchQuery("entities", ["repo_id^2", "repo_name"], text, options);
-    }
-
-    _exports.users = function(text, options) {
-        return makeMultiMatchQuery("entities", ["user_id^3", "user_email^3", "user_nick^2", "user_name"], text, options);
-    }
-
-    _exports.general = function(text, options) {
-        return makeMultiMatchQuery("entities", ["org_*", "product_*", "project_*", "repo_*", "user_*"], text, options);
-    }
 
     return _exports;
 
