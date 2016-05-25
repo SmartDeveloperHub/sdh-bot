@@ -256,7 +256,7 @@ module.exports = function(elasticSearchUrl, core, log) {
 
                     // Call the method to retrieve the data and then add it to elestic search
                     var prom = dataMethod().then(function(index, mapping, data) {
-                        return addAll(data, index.index, mapping.class, mapping.data.attributes);
+                        return addAll(data, index.index, mapping.class, mapping.data.attributes, mapping.data.config);
                     }.bind(null, index, mapping));
 
                     fillDataProms.push(prom);

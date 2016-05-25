@@ -68,7 +68,7 @@ module.exports = function(core, log) {
 
             if(options.max) {
                 params['max'] = options.max;
-            } else {
+            } else if(options.format !== 'image') {
                 params['max'] = 1;
             }
 
