@@ -1,6 +1,6 @@
 {
   "name": "sdh-core-bot",
-  "version": "0.0.1-d",
+  "version": "0.1.0",
   "description": "Smart Developer Hub SlackBot",
   "license": "Apache-2.0",
   "contributors": [

@@ -27,7 +27,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
     throw error;
 });
 
-module.exports = function(elasticSearchUrl, core, log) {
+module.exports = function(elasticSearchUrl, elasticConfig, core, log) {
 
     var _exports = {};
 
@@ -168,10 +168,8 @@ module.exports = function(elasticSearchUrl, core, log) {
 
     };
 
-    var configData = require("./elasticConfig.json");
-
-    for(var i = 0; i < configData.length; i++) {
-        var index = configData[i];
+    for(var i = 0; i < elasticConfig.length; i++) {
+        var index = elasticConfig[i];
 
         // Create index mappings operations
         for(var m = 0; m < index.mappings.length; m++) {
@@ -204,11 +202,10 @@ module.exports = function(elasticSearchUrl, core, log) {
     // ----------------------------------------------------------
     _exports.fillWithData = function() {
 
-        var configData = require("./elasticConfig.json");
         var promises = [];
 
-        for(var i = 0; i < configData.length; i++) {
-            var index = configData[i];
+        for(var i = 0; i < elasticConfig.length; i++) {
+            var index = elasticConfig[i];
             var promise;
 
             // Delete index if exists

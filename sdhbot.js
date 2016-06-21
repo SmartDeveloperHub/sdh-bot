@@ -31,7 +31,7 @@ Promise.onPossiblyUnhandledRejection(function(error){
     throw error;
 });
 
-module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, imagesServiceUrl, log) {
+module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, imagesServiceUrl, log, elasticConfig) {
 
     var core = {};
 
@@ -85,7 +85,12 @@ module.exports = function(botID, sdhApiUrl, sdhDashboardUrl, searchUrl, imagesSe
         }
 
         return preloadEntityIds().then(function() {
-            core.search = require("./brain/elasticSearch")(searchUrl, core, log);
+
+            // If an specific configuration for elastic search is not defined, use the default one
+            if(typeof elasticConfig !== 'object') {
+                elasticConfig = require("./brain/elasticConfig.json");
+            }
+            core.search = require("./brain/elasticSearch")(searchUrl, elasticConfig, core, log);
 
             return core.search.fillWithData();
         }).then(function() {
