@@ -38,7 +38,22 @@ module.exports = function(elasticSearchUrl, elasticConfig, core, log) {
 
     var elasticClient = new elasticsearch.Client({
         host: elasticSearchUrl,
-        log: 'debug',
+        log: function (config) {
+            this.error = log.error.bind(log);
+            this.warning = log.warn.bind(log);
+            this.info = log.info.bind(log);
+            this.debug = log.debug.bind(log);
+            this.trace = function (method, requestUrl, body, responseBody, responseStatus) {
+                log.trace({
+                    method: method,
+                    requestUrl: requestUrl,
+                    body: body,
+                    responseBody: responseBody,
+                    responseStatus: responseStatus
+                });
+            };
+            this.close = function () { /* bunyan's loggers do not need to be closed */ };
+        },
         defer: function () {
             return Promise.defer();
         }
